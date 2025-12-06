@@ -1,33 +1,24 @@
 'use client';
 
 import { useState, useCallback, ReactNode } from 'react';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { generateExperimentExplanation } from '../actions';
 import { Button } from '@/components/ui/button';
-import { BookCopy, FlaskConical, Loader2, Sparkles, Wand2, RefreshCw } from 'lucide-react';
+import { BookCopy, FlaskConical, Loader2, Sparkles, Wand2, RefreshCw, Plus, Equal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import Beaker from './beaker'; // Use the Beaker component
+import DraggableItem from './draggable-item'; // Use the DraggableItem component
 
 // --- TYPES AND CONSTANTS ---
-
-const ItemTypes = {
-  ELEMENT: 'element',
-};
 
 type Item = {
   id: string;
   name: string;
   category: 'Chemistry' | 'Physics' | 'Biology' | 'Tools';
-};
-
-type PlacedItem = Item & {
-  left: number;
-  top: number;
 };
 
 const INVENTORY: Record<string, Item[]> = {
@@ -69,55 +60,22 @@ const INVENTORY: Record<string, Item[]> = {
   ],
 };
 
-const REACTION_RULES: { reactants: string[]; result: string, animation: string }[] = [
-    { reactants: ['hcl', 'naoh'], result: 'Neutralization reaction producing Salt (NaCl) and Water.', animation: 'fizz' },
-    { reactants: ['cuso4', 'fe'], result: 'Displacement reaction producing Iron Sulfate (FeSO4) and Copper (Cu).', animation: 'displacement' },
-    { reactants: ['agno3', 'nacl'], result: 'Precipitation reaction producing Silver Chloride (AgCl) precipitate.', animation: 'precipitate' },
-    { reactants: ['sugar', 'burner'], result: 'Caramelization of sugar.', animation: 'caramel' },
-    { reactants: ['zn', 'hcl'], result: 'Reaction producing Hydrogen gas and Zinc Chloride (ZnCl2).', animation: 'bubbles' },
-    { reactants: ['battery', 'wire', 'bulb'], result: 'A complete electrical circuit, lighting the bulb.', animation: 'circuit' },
-    { reactants: ['magnet', 'iron_nail'], result: 'The iron nail becomes temporarily magnetized.', animation: 'magnetize' },
-    { reactants: ['plant', 'sunlight', 'water_bio', 'co2'], result: 'Photosynthesis, producing glucose and oxygen.', animation: 'glow' },
-    { reactants: ['seed', 'water_bio', 'soil'], result: 'Germination of the seed into a sprout.', animation: 'sprout' },
-    { reactants: ['plant', 'fertilizer'], result: 'The plant grows healthier and stronger.', animation: 'sparkle' },
+const REACTION_RULES: { reactants: string[]; result: string, equation: string, animation: string }[] = [
+    { reactants: ['hcl', 'naoh'], result: 'Neutralization reaction producing Salt (NaCl) and Water.', equation: 'HCl + NaOH \u2192 NaCl + H\u2082O', animation: 'fizz' },
+    { reactants: ['cuso4', 'fe'], result: 'Displacement reaction producing Iron Sulfate (FeSO4) and Copper (Cu).', equation: 'CuSO\u2084 + Fe \u2192 FeSO\u2084 + Cu', animation: 'displacement' },
+    { reactants: ['agno3', 'nacl'], result: 'Precipitation reaction producing Silver Chloride (AgCl) precipitate.', equation: 'AgNO\u2083 + NaCl \u2192 AgCl\u2193 + NaNO\u2083', animation: 'precipitate' },
+    { reactants: ['sugar', 'burner'], result: 'Caramelization of sugar.', equation: 'C\u2081\u2082H\u2082\u2082O\u2081\u2081 + Heat \u2192 Caramel', animation: 'caramel' },
+    { reactants: ['zn', 'hcl'], result: 'Reaction producing Hydrogen gas and Zinc Chloride (ZnCl2).', equation: 'Zn + 2HCl \u2192 ZnCl\u2082 + H\u2082\u2191', animation: 'bubbles' },
+    { reactants: ['battery', 'wire', 'bulb'], result: 'A complete electrical circuit, lighting the bulb.', equation: 'Circuit Complete!', animation: 'circuit' },
+    { reactants: ['magnet', 'iron_nail'], result: 'The iron nail becomes temporarily magnetized.', equation: 'Magnetism Transfer', animation: 'magnetize' },
+    { reactants: ['plant', 'sunlight', 'water_bio', 'co2'], result: 'Photosynthesis, producing glucose and oxygen.', equation: '6CO\u2082 + 6H\u2082O + Light \u2192 C\u2086H\u2081\u2082O\u2086 + 6O\u2082', animation: 'glow' },
+    { reactants: ['seed', 'water_bio', 'soil'], result: 'Germination of the seed into a sprout.', equation: 'Seed + Water + Soil \u2192 Sprout', animation: 'sprout' },
+    { reactants: ['plant', 'fertilizer'], result: 'The plant grows healthier and stronger.', equation: 'Plant + Nutrients \u2192 Growth', animation: 'sparkle' },
 ];
-
-// --- DRAG & DROP COMPONENTS ---
-
-const InventoryItem = ({ item }: { item: Item }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: ItemTypes.ELEMENT,
-    item: { id: item.id, name: item.name, category: item.category },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-  }));
-
-  return (
-    <div
-      ref={drag}
-      className={cn("p-2 rounded-md cursor-grab active:cursor-grabbing transition-all hover:scale-105 hover:shadow-lg bg-secondary/20 border-2 border-secondary/40 burnt-edge", isDragging && "opacity-50 ring-2 ring-accent")}
-    >
-      <p className="font-medium text-center text-secondary-foreground">{item.name}</p>
-    </div>
-  );
-};
-
-const PlacedItemComponent = ({ item }: { item: PlacedItem }) => {
-    return (
-        <div
-            style={{ left: item.left, top: item.top }}
-            className="absolute p-3 rounded-md bg-card/80 border border-border shadow-md"
-        >
-            <p className="font-medium text-center text-card-foreground">{item.name}</p>
-        </div>
-    );
-};
-
 
 // --- UI & LAYOUT COMPONENTS ---
 
-const InventoryPanel = () => (
+const InventoryPanel = ({ items }: { items: Record<string, Item[]> }) => (
   <Card className="lg:col-span-1 h-full flex flex-col">
     <CardHeader>
       <CardTitle className="flex items-center gap-2">
@@ -134,10 +92,10 @@ const InventoryPanel = () => (
         </TabsList>
         <ScrollArea className="flex-1 mt-2">
             <div className="pr-4">
-                {Object.entries(INVENTORY).map(([category, items]) => (
+                {Object.entries(items).map(([category, categoryItems]) => (
                     <TabsContent key={category} value={category} className="grid grid-cols-2 gap-3 mt-0">
-                        {items.map((item) => (
-                            <InventoryItem key={item.id} item={item} />
+                        {categoryItems.map((item) => (
+                            <DraggableItem key={item.id} item={item} />
                         ))}
                     </TabsContent>
                 ))}
@@ -148,44 +106,53 @@ const InventoryPanel = () => (
   </Card>
 );
 
-const ExperimentCanvas = ({ placedItems, onDrop }: { placedItems: PlacedItem[], onDrop: (item: Item, position: {x: number, y: number}) => void }) => {
-    const [, drop] = useDrop(() => ({
-        accept: ItemTypes.ELEMENT,
-        drop: (item: Item, monitor) => {
-            const delta = monitor.getClientOffset();
-            if (delta) {
-                onDrop(item, { x: delta.x, y: delta.y });
-            }
-        },
-    }), [onDrop]);
-
-    return (
-        <div ref={drop} className="relative lg:col-span-2 w-full h-[50vh] lg:h-full rounded-lg bg-cover bg-center bg-[url('https://www.transparenttextures.com/patterns/wood-table.png')] burnt-edge-pulse">
-            {placedItems.map(item => (
-                <PlacedItemComponent key={item.id} item={item}/>
-            ))}
+const ReactionDisplay = ({ items, reaction }: { items: Item[], reaction: {equation: string} | null }) => (
+    <Card className="flex items-center justify-center min-h-[100px] bg-primary/5 burnt-edge">
+        <div className="flex items-center gap-2 text-2xl font-headline text-primary p-4">
+            {reaction ? (
+                <span className="text-accent animate-pulse">{reaction.equation}</span>
+            ) : items.length > 0 ? (
+                 items.map((item, index) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                        <span>{item.name}</span>
+                        {index < items.length -1 && <Plus className="text-muted-foreground"/>}
+                    </div>
+                ))
+            ) : (
+                <span className="text-muted-foreground">The Alchemist's Workspace</span>
+            )}
         </div>
-    );
-};
-
+    </Card>
+);
 
 // --- MAIN PAGE COMPONENT ---
 
 export default function ExperimentClientPage() {
-  const [placedItems, setPlacedItems] = useState<PlacedItem[]>([]);
+  const [inventory, setInventory] = useState<Record<string, Item[]>>(INVENTORY);
+  const [beakerContents, setBeakerContents] = useState<Item[]>([]);
   const [explanation, setExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [reaction, setReaction] = useState<{ reactants: string[]; result: string, equation: string, animation: string } | null>(null);
   const { toast } = useToast();
 
-  const handleDrop = useCallback((item: Item, position: {x: number, y: number}) => {
-    if (!placedItems.some((pi) => pi.id === item.id)) {
-        // Adjusting for canvas position could be complex, for now place relative to viewport
-        // A real implementation would use refs to get canvas bounds
-        setPlacedItems((prev) => [...prev, { ...item, left: position.x - 400, top: position.y - 200 }]); // Adjustments are approximate
+  const handleDrop = (item: Item) => {
+    if (!beakerContents.some((i) => i.id === item.id)) {
+      setBeakerContents((prev) => [...prev, item]);
+      // Remove from inventory
+      setInventory(prev => {
+        const newInventory = { ...prev };
+        newInventory[item.category] = newInventory[item.category].filter(invItem => invItem.id !== item.id);
+        return newInventory;
+      });
+    } else {
+        toast({
+            title: 'Already Added',
+            description: `${item.name} is already in the beaker.`,
+        });
     }
-  }, [placedItems]);
+  };
 
-  const checkForReaction = (currentItems: PlacedItem[]) => {
+  const checkForReaction = (currentItems: Item[]) => {
     const currentItemIds = new Set(currentItems.map(item => item.id));
 
     for (const rule of REACTION_RULES) {
@@ -198,18 +165,19 @@ export default function ExperimentClientPage() {
   };
 
   const handleMix = async () => {
-    if (placedItems.length < 2) {
+    if (beakerContents.length < 2) {
       toast({
         title: 'Not enough elements!',
-        description: 'Drag at least two elements onto the canvas to see a reaction.',
+        description: 'Drag at least two elements into the beaker to see a reaction.',
         variant: 'destructive',
       });
       return;
     }
 
-    const reaction = checkForReaction(placedItems);
+    const foundReaction = checkForReaction(beakerContents);
+    setReaction(foundReaction);
     
-    if (!reaction) {
+    if (!foundReaction) {
         toast({
             title: 'No Reaction',
             description: 'These elements do not seem to react. The Alchemist ponders...',
@@ -220,7 +188,7 @@ export default function ExperimentClientPage() {
     setIsLoading(true);
     setExplanation('');
 
-    const experimentDescription = `A student has combined ${placedItems.map(i => i.name).join(', ')}. The expected result is: ${reaction.result}.`;
+    const experimentDescription = `A student has combined ${beakerContents.map(i => i.name).join(', ')}. The reaction is: ${foundReaction.equation}. The result is: ${foundReaction.result}.`;
 
     const result = await generateExperimentExplanation(experimentDescription);
 
@@ -237,61 +205,59 @@ export default function ExperimentClientPage() {
   };
 
   const handleReset = () => {
-    setPlacedItems([]);
+    setInventory(INVENTORY);
+    setBeakerContents([]);
     setExplanation('');
+    setReaction(null);
     setIsLoading(false);
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 p-4 lg:p-6 min-h-[80vh]">
-        <InventoryPanel />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 p-4 lg:p-6 min-h-[80vh]">
+      <InventoryPanel items={inventory} />
 
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <ExperimentCanvas placedItems={placedItems} onDrop={handleDrop} />
+      <div className="lg:col-span-2 flex flex-col gap-6">
+        
+        <ReactionDisplay items={beakerContents} reaction={reaction} />
 
-          <div className="flex gap-4 justify-center">
-            <Button onClick={handleMix} disabled={isLoading || placedItems.length < 2}>
-              {isLoading ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <Sparkles />
-              )}
-              Trigger Reaction
-            </Button>
-            <Button onClick={handleReset} variant="outline">
-              <RefreshCw />
-              Clear Canvas
-            </Button>
-          </div>
-
-          {(isLoading || explanation) && (
-            <Card className="min-h-[150px] torch-flicker">
-                <CardHeader>
-                     <CardTitle className="font-headline text-lg flex items-center gap-2">
-                        <BookCopy /> The Alchemist's Scroll
-                     </CardTitle>
-                </CardHeader>
-                <CardContent>
-                {isLoading && !explanation ? (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
-                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse [animation-delay:0.2s]"></div>
-                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse [animation-delay:0.4s]"></div>
-                        <span className="ml-2">The Alchemist is transcribing the results...</span>
-                    </div>
-                ): (
-                     <Alert className="animate-[ink-fade-in_1s_ease-out_forwards] opacity-0 border-0 p-0">
-                        <AlertDescription className="prose prose-sm dark:prose-invert max-w-none">
-                            {explanation}
-                        </AlertDescription>
-                    </Alert>
-                )}
-                </CardContent>
-            </Card>
-          )}
+        <div className="flex-1 flex flex-col justify-center items-center gap-4">
+            <Beaker contents={beakerContents} onDrop={handleDrop} />
         </div>
+
+        <div className="flex gap-4 justify-center">
+          <Button onClick={handleMix} disabled={isLoading || beakerContents.length < 2}>
+            {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
+            Trigger Reaction
+          </Button>
+          <Button onClick={handleReset} variant="outline">
+            <RefreshCw />
+            Clear Beaker
+          </Button>
+        </div>
+
+        {(isLoading || explanation) && (
+          <Card className="min-h-[150px] torch-flicker">
+              <CardHeader>
+                    <CardTitle className="font-headline text-lg flex items-center gap-2">
+                      <BookCopy /> The Alchemist's Scroll
+                    </CardTitle>
+              </CardHeader>
+              <CardContent>
+              {isLoading && !explanation ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse [animation-delay:0.2s]"></div>
+                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse [animation-delay:0.4s]"></div>
+                      <span className="ml-2">The Alchemist is transcribing the results...</span>
+                  </div>
+              ): (
+                    <div className="prose prose-sm dark:prose-invert max-w-none animate-[ink-fade-in_1s_ease-out_forwards] opacity-0"
+                         dangerouslySetInnerHTML={{ __html: explanation }} />
+              )}
+              </CardContent>
+          </Card>
+        )}
       </div>
-    </DndProvider>
+    </div>
   );
 }

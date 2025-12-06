@@ -1,5 +1,7 @@
 import PageWrapper from '@/components/page-wrapper';
 import ExperimentClientPage from './components/experiment-client-page';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 export default function SandboxExperimentPage() {
   return (
@@ -12,7 +14,9 @@ export default function SandboxExperimentPage() {
           Combine the elements of science and witness the magic of creation.
         </p>
       </div>
-      <ExperimentClientPage />
+      <DndProvider backend={HTML5Backend}>
+        <ExperimentClientPage />
+      </DndProvider>
     </PageWrapper>
   );
 }

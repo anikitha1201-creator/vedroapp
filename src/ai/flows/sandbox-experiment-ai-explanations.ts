@@ -10,11 +10,12 @@
 import {ai} from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
 import {z} from 'genkit';
+import { marked } from 'marked';
 
 const ExperimentExplanationInputSchema = z.object({
   experimentDescription:
     z.string()
-      .describe('A description of the items a student combined in the sandbox and the expected result.'),
+      .describe('A description of the items a student combined in the sandbox, the resulting chemical equation, and the observed result.'),
 });
 export type ExperimentExplanationInput = z.infer<typeof ExperimentExplanationInputSchema>;
 
@@ -26,7 +27,10 @@ export type ExperimentExplanationOutput = z.infer<typeof ExperimentExplanationOu
 export async function getExperimentExplanation(
   input: ExperimentExplanationInput
 ): Promise<ExperimentExplanationOutput> {
-  return experimentExplanationFlow(input);
+  const result = await experimentExplanationFlow(input);
+  // Parse markdown to HTML before sending to client
+  const htmlExplanation = await marked.parse(result.explanation);
+  return { explanation: htmlExplanation };
 }
 
 const prompt = ai.definePrompt({
@@ -41,25 +45,25 @@ Your task is to provide a clear, engaging, and educational explanation of the re
 The student's experiment is as follows:
 {{experimentDescription}}
 
-Please generate a response in Markdown format that includes the following sections:
+Please generate a response in Markdown format that includes the following sections, using thematic and engaging language:
 
-### 📜 The Reaction That Occurred
-Start by confirming what happened in a thematic way. (e.g., "Indeed, you've masterfully performed a neutralization reaction!")
+### \uD83D\uDCDC The Reaction That Occurred
+Start by confirming what happened in a thematic way, referencing the provided equation. (e.g., "Indeed, you've masterfully performed a neutralization reaction, turning acid and base into salt and water!")
 
-### ✨ Step-by-Step Explanation
-Break down the scientific process into simple, easy-to-understand steps. Use bullet points.
+### \u2728 Step-by-Step Explanation
+Break down the scientific process into simple, easy-to-understand steps. Use bullet points. Explain what is happening at a molecular or conceptual level.
 
-### 🔬 The Alchemist's Principle
-Explain the core scientific principle behind the reaction (e.g., "The principle at play here is called displacement...").
+### \uD83D\uDD2C The Alchemist's Principle
+Explain the core scientific principle behind the reaction (e.g., "The principle at play here is called displacement, where a more reactive metal takes the place of a less reactive one...").
 
-### 🌍 Real-World Parchments
-Provide a relatable, real-world example or application of this principle.
+### \uD83C\uDF0D Real-World Parchments
+Provide a relatable, real-world example or application of this principle. Make it tangible for the student.
 
-### ⚠️ A Note on Misconceptions
-Briefly address a common misconception related to this experiment.
+### \u26A0\uFE0F A Note on Misconceptions
+Briefly address a common misconception related to this experiment. (e.g., "Many believe all salts are like table salt, but in alchemy, a 'salt' is any ionic compound formed from such a reaction.")
 
-### 💡 The Next Experiment
-Suggest a follow-up experiment the student could try in the sandbox to further their learning. (e.g., "Now, try combining the Iron Nail with the Magnet.")
+### \uD83D\uDCA1 The Next Experiment
+Suggest a specific follow-up experiment the student could try in the sandbox to further their learning, using items from the inventory. (e.g., "Now that you have mastered displacement, try combining the Iron Nail (Fe) with the Copper Sulfate (CuSO4).")
 
 Keep your tone encouraging, wise, and slightly magical. The goal is to make learning feel like discovering ancient secrets.
   `,
@@ -74,7 +78,7 @@ const experimentExplanationFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
-      return {explanation: "The Alchemist ponders... but the mixture is inert. Try combining different elements."}
+      return {explanation: "### The Alchemist Ponders...\nThe mixture is inert, like a silent stone in a forgotten library. No reaction occurred with these elements. Perhaps try combining different ingredients from the scrolls?"}
     }
     return output;
   }
