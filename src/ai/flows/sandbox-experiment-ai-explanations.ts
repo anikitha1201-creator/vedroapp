@@ -8,6 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import {z} from 'genkit';
 
 const ExperimentExplanationInputSchema = z.object({
@@ -32,6 +33,7 @@ const prompt = ai.definePrompt({
   name: 'experimentExplanationPrompt',
   input: {schema: ExperimentExplanationInputSchema},
   output: {schema: ExperimentExplanationOutputSchema},
+  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are an expert science teacher. A student has performed the following experiment:
 
   {{experimentDescription}}
