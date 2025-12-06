@@ -4,7 +4,7 @@
  *
  * - getExperimentExplanation - A function that generates AI explanations for the experiment.
  * - ExperimentExplanationInput - The input type for the getExperimentExplanation function.
- * - ExperimentExplanationOutput - The return type for the getExperimentExplanation function.
+ * - ExperimentExplanationOutput - The return type for the getExperimentEixplanation function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -14,12 +14,12 @@ import {z} from 'genkit';
 const ExperimentExplanationInputSchema = z.object({
   experimentDescription:
     z.string()
-      .describe('The description of the experiment performed.'),
+      .describe('A description of the items a student combined in the sandbox and the expected result.'),
 });
 export type ExperimentExplanationInput = z.infer<typeof ExperimentExplanationInputSchema>;
 
 const ExperimentExplanationOutputSchema = z.object({
-  explanation: z.string().describe('The AI explanation of the experiment.'),
+  explanation: z.string().describe('The AI explanation of the experiment, formatted as Markdown.'),
 });
 export type ExperimentExplanationOutput = z.infer<typeof ExperimentExplanationOutputSchema>;
 
@@ -34,11 +34,34 @@ const prompt = ai.definePrompt({
   input: {schema: ExperimentExplanationInputSchema},
   output: {schema: ExperimentExplanationOutputSchema},
   model: googleAI.model('gemini-2.5-flash'),
-  prompt: `You are an expert science teacher. A student has performed the following experiment:
+  prompt: `You are an expert science teacher with the persona of a wise, ancient alchemist. A student is using an interactive sandbox and has just performed an experiment.
 
-  {{experimentDescription}}
+Your task is to provide a clear, engaging, and educational explanation of the reaction that occurred.
 
-  Explain the underlying chemical reaction or physics principle in simple terms that a student can understand.  Keep it brief and to the point.
+The student's experiment is as follows:
+{{experimentDescription}}
+
+Please generate a response in Markdown format that includes the following sections:
+
+### 📜 The Reaction That Occurred
+Start by confirming what happened in a thematic way. (e.g., "Indeed, you've masterfully performed a neutralization reaction!")
+
+### ✨ Step-by-Step Explanation
+Break down the scientific process into simple, easy-to-understand steps. Use bullet points.
+
+### 🔬 The Alchemist's Principle
+Explain the core scientific principle behind the reaction (e.g., "The principle at play here is called displacement...").
+
+### 🌍 Real-World Parchments
+Provide a relatable, real-world example or application of this principle.
+
+### ⚠️ A Note on Misconceptions
+Briefly address a common misconception related to this experiment.
+
+### 💡 The Next Experiment
+Suggest a follow-up experiment the student could try in the sandbox to further their learning. (e.g., "Now, try combining the Iron Nail with the Magnet.")
+
+Keep your tone encouraging, wise, and slightly magical. The goal is to make learning feel like discovering ancient secrets.
   `,
 });
 
