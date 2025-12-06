@@ -9,7 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { googleAI }s from '@genkit-ai/google-genai';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const ChatbotInputSchema = z.object({
   history: z.array(z.object({
