@@ -50,6 +50,9 @@ const experimentExplanationFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      return {explanation: "The Alchemist ponders... but the mixture is inert. Try combining different elements."}
+    }
+    return output;
   }
 );
