@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Settings, User } from 'lucide-react';
+import { LayoutDashboard, LogOut, Settings, User } from 'lucide-react';
 
 export default function Header() {
   return (
@@ -18,7 +18,13 @@ export default function Header() {
         <Link href="/" className="text-2xl font-bold font-headline text-primary tracking-wider">
           Vedro
         </Link>
-        <nav>
+        <nav className="flex items-center gap-4">
+          <Button variant="ghost" asChild>
+            <Link href="/">
+              <LayoutDashboard />
+              Dashboard
+            </Link>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
