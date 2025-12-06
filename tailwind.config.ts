@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        body: ["'Literata'", 'serif'],
+        headline: ["'Literata'", 'serif'],
         code: ['monospace'],
       },
       colors: {
@@ -88,12 +88,35 @@ export default {
             height: '0',
           },
         },
+        'scroll-unroll': {
+          from: { clipPath: 'inset(0 50% 100% 50%)' },
+          to: { clipPath: 'inset(0 0 0 0)' },
+        },
+        'ink-fade-in': {
+          from: { opacity: '0', filter: 'blur(5px)', transform: 'translateY(10px)' },
+          to: { opacity: '1', filter: 'blur(0)', transform: 'translateY(0)' },
+        },
+        'burnt-edge-pulse': {
+          '0%, 100%': { boxShadow: 'inset 0 0 10px 5px hsl(var(--background)), 0 0 5px 2px hsla(var(--accent) / 0.7), 0 0 3px 1px hsl(var(--border))' },
+          '50%': { boxShadow: 'inset 0 0 12px 6px hsl(var(--background)), 0 0 15px 5px hsla(var(--accent) / 1), 0 0 3px 1px hsl(var(--border))' },
+        },
+        'torch-flicker': {
+          '0%, 100%': { opacity: '0.05', boxShadow: '0 0 20px 10px hsla(var(--accent) / 0.1)' },
+          '20%': { opacity: '0.1', boxShadow: '0 0 25px 12px hsla(var(--accent) / 0.15)' },
+          '40%': { opacity: '0.08', boxShadow: '0 0 22px 11px hsla(var(--accent) / 0.12)' },
+          '60%': { opacity: '0.12', boxShadow: '0 0 28px 14px hsla(var(--accent) / 0.18)' },
+          '80%': { opacity: '0.07', boxShadow: '0 0 23px 11px hsla(var(--accent) / 0.13)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'scroll-unroll': 'scroll-unroll 0.7s cubic-bezier(0.65, 0, 0.35, 1) forwards',
+        'ink-fade-in': 'ink-fade-in 1s ease-out forwards',
+        'burnt-edge-pulse': 'burnt-edge-pulse 2s infinite',
+        'torch-flicker': 'torch-flicker 5s infinite',
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 } satisfies Config;

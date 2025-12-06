@@ -1,0 +1,124 @@
+/* Ink-Fade Text Animation */
+@keyframes ink-fade-in {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* Burnt-Edge Pulse Animation */
+@keyframes burnt-edge-pulse {
+  0% {
+    box-shadow: 
+      inset 0 0 10px 5px hsl(var(--background)),
+      0 0 5px 2px hsla(var(--accent) / 0.7),
+      0 0 3px 1px hsl(var(--border));
+  }
+  50% {
+    box-shadow: 
+      inset 0 0 12px 6px hsl(var(--background)),
+      0 0 15px 5px hsla(var(--accent) / 1),
+      0 0 3px 1px hsl(var(--border));
+  }
+  100% {
+    box-shadow: 
+      inset 0 0 10px 5px hsl(var(--background)),
+      0 0 5px 2px hsla(var(--accent) / 0.7),
+      0 0 3px 1px hsl(var(--border));
+  }
+}
+
+/* Torch Flicker Glow Animation */
+@keyframes torch-flicker {
+  0%, 100% {
+    opacity: 0.05;
+    box-shadow: 0 0 20px 10px hsla(var(--accent) / 0.1);
+  }
+  20% {
+    opacity: 0.1;
+    box-shadow: 0 0 25px 12px hsla(var(--accent) / 0.15);
+  }
+  40% {
+    opacity: 0.08;
+    box-shadow: 0 0 22px 11px hsla(var(--accent) / 0.12);
+  }
+  60% {
+    opacity: 0.12;
+    box-shadow: 0 0 28px 14px hsla(var(--accent) / 0.18);
+  }
+  80% {
+    opacity: 0.07;
+    box-shadow: 0 0 23px 11px hsla(var(--accent) / 0.13);
+  }
+}
+
+/* Dust Particle Drift Animation */
+@keyframes dust-particles-drift {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10%, 90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 0), var(--ty, 0));
+    opacity: 0;
+  }
+}
+
+/* Quill Writing Animation */
+@keyframes quill-writing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes caret-blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+/* Gold Flare Animation */
+@keyframes gold-flare {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+    box-shadow: 0 0 0 0 hsla(var(--accent) / 0.7);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 0 30px 20px hsla(var(--accent) / 0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+    box-shadow: 0 0 0 0 hsla(var(--accent) / 0);
+  }
+}
+
+/* Red Ink Splash Animation */
+@keyframes red-ink-splash {
+  0% {
+    opacity: 0.8;
+    transform: scale(0);
+  }
+  80% {
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}

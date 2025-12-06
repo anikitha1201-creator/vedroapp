@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "ai-chatbot",
+      "description": "An illustration of an ancient scroll and a quill, representing knowledge and communication.",
+      "imageUrl": "https://images.unsplash.com/photo-1674052844389-aba70e511faf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzY3JvbGwlMjBxdWlsbHxlbnwwfHx8fDE3NjUwNjQxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "scroll quill"
+    },
+    {
+      "id": "concept-builder",
+      "description": "Wooden blocks with symbols, suggesting a puzzle or building activity.",
+      "imageUrl": "https://images.unsplash.com/photo-1655475019270-418f6854b883?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b29kJTIwYmxvY2tzfGVufDB8fHx8MTc2NTA2NDE1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wood blocks"
+    },
+    {
+      "id": "sandbox-experiment",
+      "description": "Glowing potions and flasks in a dimly lit laboratory, evoking magic and science.",
+      "imageUrl": "https://images.unsplash.com/photo-1602531019754-146bfbc69dd9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxnbG93aW5nJTIwcG90aW9uc3xlbnwwfHx8fDE3NjUwNjQxNTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "glowing potions"
+    },
+    {
+      "id": "running-quiz",
+      "description": "An ancient path or maze, representing a journey or challenge.",
+      "imageUrl": "https://images.unsplash.com/photo-1501668343018-9234e3ee801a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzdG9uZSUyMHBhdGh8ZW58MHx8fHwxNzY0OTc4MTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "stone path"
+    },
+    {
+      "id": "profile",
+      "description": "A collection of medals and badges on a wooden plaque.",
+      "imageUrl": "https://images.unsplash.com/photo-1667406593453-5bc911f8dd50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtZWRhbHMlMjBwbGFxdWV8ZW58MHx8fHwxNzY1MDY0MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "medals plaque"
+    },
+    {
+      "id": "settings",
+      "description": "Antique gears and cogs, representing machinery and settings.",
+      "imageUrl": "https://images.unsplash.com/photo-1667752715523-35b8f8a592fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhbnRpcXVlJTIwZ2VhcnN8ZW58MHx8fHwxNzY1MDY0MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "antique gears"
+    }
+  ]
 }
