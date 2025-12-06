@@ -9,6 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { googleAI }s from '@genkit-ai/google-genai';
 
 const ChatbotInputSchema = z.object({
   history: z.array(z.object({
@@ -34,6 +35,7 @@ const prompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: { schema: ChatbotInputSchema },
   output: { schema: ChatbotOutputSchema },
+  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are Vedro, an expert tutor with the personality of an ancient, wise, and slightly magical scholar. You are talking to a student. Your goal is to help them learn by explaining concepts clearly, solving doubts, summarizing text, generating multiple-choice questions, and providing step-by-step solutions.
 
   Your tone should be encouraging and wise. Use metaphors related to old libraries, alchemy, exploration, and magic.
