@@ -10,9 +10,9 @@ import ChatMessage from './chat-message';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
-type Message = {
+export type Message = {
   role: 'user' | 'model';
-  content: string;
+  content: any; // Can be string or a structured object
 };
 
 export default function ChatInterface() {
@@ -28,7 +28,6 @@ export default function ChatInterface() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Auto-scroll to bottom
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTo({
         top: scrollAreaRef.current.scrollHeight,
@@ -46,7 +45,7 @@ export default function ChatInterface() {
     setInput('');
     setIsLoading(true);
 
-    const history = messages.map(msg => ({ role: msg.role, content: msg.content }));
+    const history = messages.map(msg => ({ role: msg.role, content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }));
 
     const result = await generateChatbotResponse({ history, prompt: input });
 
@@ -59,14 +58,13 @@ export default function ChatInterface() {
         description: result.error,
         variant: 'destructive',
       });
-       // remove the user message if the AI fails
        setMessages(prev => prev.slice(0, prev.length - 1));
     }
     setIsLoading(false);
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto h-[75vh] flex flex-col torch-flicker">
+    <Card className="w-full max-w-4xl mx-auto h-[80vh] flex flex-col torch-flicker">
       <CardHeader>
         <div className="flex items-center gap-3">
           <Sparkles className="text-accent"/>
@@ -91,7 +89,7 @@ export default function ChatInterface() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question, seek an explanation..."
+            placeholder="What concept shall we unravel today? (e.g., Photosynthesis, Pythagoras Theorem...)"
             disabled={isLoading}
             className="flex-1"
           />
