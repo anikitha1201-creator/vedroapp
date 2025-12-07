@@ -1,10 +1,5 @@
 
-import dynamic from 'next/dynamic';
-
-const ExperimentClientPage = dynamic(
-  () => import('./components/experiment-client-page'),
-  { ssr: false }
-);
+import SandboxLoader from './components/sandbox-loader';
 
 export default function SandboxExperimentPage() {
   return (
@@ -17,7 +12,7 @@ export default function SandboxExperimentPage() {
           Combine the elements of science and witness the magic of creation.
         </p>
       </div>
-      <ExperimentClientPage />
+      <SandboxLoader />
     </>
   );
 }
