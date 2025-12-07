@@ -35,12 +35,6 @@
       "description": "Antique gears and cogs, representing machinery and settings.",
       "imageUrl": "https://images.unsplash.com/photo-1667752715523-35b8f8a592fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhbnRpcXVlJTIwZ2VhcnN8ZW58MHx8fHwxNzY1MDY0MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "antique gears"
-    },
-    {
-      "id": "book-demo",
-      "description": "An old, open book with blank pages, suggesting a story to be written.",
-      "imageUrl": "https://images.unsplash.com/photo-1456743625079-86a97ff8bc8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxvbGQlMjBib29rfGVufDB8fHx8MTc2NTI0NjAyN3ww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "old book"
     }
   ]
 }
