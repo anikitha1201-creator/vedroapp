@@ -81,6 +81,22 @@
   }
 }
 
+/* Green Burst - Correct Answer Celebration Animation */
+@keyframes green-burst-anim {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsla(140, 70%, 40%, 0);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px 15px hsla(140, 70%, 40%, 0.7);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsla(140, 70%, 40%, 0);
+  }
+}
+
 /* Red Ink Splash - Incorrect Answer Penalty Animation */
 @keyframes red-ink-splash-anim {
   0% { transform: translateX(0); }
@@ -125,25 +141,14 @@
 }
 
 /* Page Turn Animation */
-@keyframes turn-page-forward {
-  0% {
-    transform: perspective(1000px) rotateY(0deg);
-    transform-origin: left;
+@keyframes book-open {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-25deg) scale(0.9);
   }
-  100% {
-    transform: perspective(1000px) rotateY(-180deg);
-    transform-origin: left;
-  }
-}
-
-@keyframes turn-page-backward {
-  0% {
-    transform: perspective(1000px) rotateY(-180deg);
-    transform-origin: left;
-  }
-  100% {
-    transform: perspective(1000px) rotateY(0deg);
-    transform-origin: left;
+  to {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0deg) scale(1);
   }
 }
 

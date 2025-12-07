@@ -83,10 +83,14 @@ const QuestionModal = ({ question, onAnswer, result }: { question: typeof questi
                     {question.options.map((option) => (
                         <Button
                             key={option}
-                            variant={result && option === question.answer ? 'default' : result && option === result.answer ? 'destructive' : 'outline'}
+                            variant={
+                                result && option === question.answer ? 'success' 
+                                : result && option === result.answer ? 'destructive' 
+                                : 'outline'
+                            }
                             className={cn(
                                 "h-auto py-4 text-lg wax-press",
-                                result && option === question.answer && 'gold-burst',
+                                result && option === question.answer && 'green-burst',
                                 result && option === result.answer && !result.isCorrect && 'animate-shake'
                             )}
                             onClick={() => onAnswer(option === question.answer, option)}
@@ -115,6 +119,7 @@ export default function QuizRunnerClient() {
   const [gameState, setGameState] = useState<GameState>('start');
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
+  const [showPointsIndicator, setShowPointsIndicator] = useState(false);
 
   // Player & Scrolls state
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -189,6 +194,8 @@ export default function QuizRunnerClient() {
     
     if (isCorrect) {
       setScore(prev => prev + 10);
+      setShowPointsIndicator(true);
+      setTimeout(() => setShowPointsIndicator(false), 1000);
     } else {
        setTimeLeft(prev => Math.max(0, prev - 3)); // 3 second penalty
     }
@@ -265,7 +272,12 @@ export default function QuizRunnerClient() {
         <div className="relative z-10 flex justify-between items-center p-4 text-lg font-bold text-primary-foreground bg-primary/50">
             <div className="flex items-center gap-2 px-3 py-1 rounded-full">
                 <Award size={20}/> 
-                <span>Score: {score}</span>
+                <span className="relative">
+                  Score: {score}
+                  {showPointsIndicator && (
+                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-green-400 font-bold animate-[ink-fade-in_1s_ease-out_forwards]">+10 Coins</span>
+                  )}
+                </span>
             </div>
             <div className="flex flex-col items-center">
                  <span className="text-3xl">{timeLeft}</span>

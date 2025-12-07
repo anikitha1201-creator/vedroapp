@@ -1,4 +1,5 @@
 
+
 @import "./animations.css";
 
 @tailwind base;
@@ -142,6 +143,10 @@
   .gold-burst {
     animation: gold-burst-anim 0.7s ease-out forwards;
   }
+  
+  .green-burst {
+    animation: green-burst-anim 0.7s ease-out forwards;
+  }
 
   .red-ink-splash {
     animation: red-ink-splash-anim 0.7s ease-out forwards;
@@ -152,4 +157,3 @@
   }
 
 }
-
