@@ -1,0 +1,335 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "User's display name."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "theme": {
+          "type": "string",
+          "description": "User's preferred theme (e.g., light, dark)."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ]
+    },
+    "GameHistory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GameHistory",
+      "type": "object",
+      "description": "Stores the history of games played by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the GameHistory entry."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N GameHistory)"
+        },
+        "gameType": {
+          "type": "string",
+          "description": "Type of game played (e.g., Concept Builder, Sandbox Experiment, Running Quiz)."
+        },
+        "score": {
+          "type": "number",
+          "description": "Score achieved in the game."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the game was played.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "gameType",
+        "score",
+        "timestamp"
+      ]
+    },
+    "TopicStep": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TopicStep",
+      "type": "object",
+      "description": "Represents a step in a concept-building topic.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the TopicStep."
+        },
+        "topicId": {
+          "type": "string",
+          "description": "Reference to the topic this step belongs to."
+        },
+        "stepOrder": {
+          "type": "number",
+          "description": "The order of the step within the topic."
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the step (e.g., text, image URL)."
+        }
+      },
+      "required": [
+        "id",
+        "topicId",
+        "stepOrder",
+        "content"
+      ]
+    },
+    "ExperimentResult": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ExperimentResult",
+      "type": "object",
+      "description": "Stores the results of a sandbox experiment.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ExperimentResult."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N ExperimentResult)"
+        },
+        "experimentId": {
+          "type": "string",
+          "description": "Reference to the experiment definition."
+        },
+        "results": {
+          "type": "string",
+          "description": "JSON string containing the results of the experiment."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the experiment was performed.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "experimentId",
+        "results",
+        "timestamp"
+      ]
+    },
+    "QuizQuestion": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "QuizQuestion",
+      "type": "object",
+      "description": "Represents a question in the running quiz game.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the QuizQuestion."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject of the quiz question (e.g., Math, Science)."
+        },
+        "questionText": {
+          "type": "string",
+          "description": "Text of the quiz question."
+        },
+        "optionA": {
+          "type": "string",
+          "description": "Option A for the quiz question."
+        },
+        "optionB": {
+          "type": "string",
+          "description": "Option B for the quiz question."
+        },
+        "optionC": {
+          "type": "string",
+          "description": "Option C for the quiz question."
+        },
+        "correctAnswer": {
+          "type": "string",
+          "description": "The correct answer for the question (A, B, or C)."
+        }
+      },
+      "required": [
+        "id",
+        "subject",
+        "questionText",
+        "optionA",
+        "optionB",
+        "optionC",
+        "correctAnswer"
+      ]
+    },
+    "Badge": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Badge",
+      "type": "object",
+      "description": "Represents a badge that a user can earn.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Badge."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the badge."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the badge and how to earn it."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the badge image.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "imageUrl"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}/profile",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profile information. Path-based ownership ensures only the user can access their own profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/history/{historyId}",
+        "definition": {
+          "entityName": "GameHistory",
+          "schema": {
+            "$ref": "#/backend/entities/GameHistory"
+          },
+          "description": "Stores the game history for a user. Path-based ownership ensures only the user can access their own game history.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "historyId",
+              "description": "The unique identifier for the game history entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/topics/{topicId}/steps/{stepId}",
+        "definition": {
+          "entityName": "TopicStep",
+          "schema": {
+            "$ref": "#/backend/entities/TopicStep"
+          },
+          "description": "Stores the steps for a given topic.",
+          "params": [
+            {
+              "name": "topicId",
+              "description": "The unique identifier for the topic."
+            },
+            {
+              "name": "stepId",
+              "description": "The unique identifier for the topic step."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/experiments/{experimentResultId}",
+        "definition": {
+          "entityName": "ExperimentResult",
+          "schema": {
+            "$ref": "#/backend/entities/ExperimentResult"
+          },
+          "description": "Stores the results of a sandbox experiment. Path-based ownership ensures only the user can access their own experiment results.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "experimentResultId",
+              "description": "The unique identifier for the experiment result."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/quizQuestions/{subject}/{questionId}",
+        "definition": {
+          "entityName": "QuizQuestion",
+          "schema": {
+            "$ref": "#/backend/entities/QuizQuestion"
+          },
+          "description": "Stores quiz questions, categorized by subject.",
+          "params": [
+            {
+              "name": "subject",
+              "description": "The subject of the quiz question (e.g., Math, Science)."
+            },
+            {
+              "name": "questionId",
+              "description": "The unique identifier for the quiz question."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/badges/{badgeId}",
+        "definition": {
+          "entityName": "Badge",
+          "schema": {
+            "$ref": "#/backend/entities/Badge"
+          },
+          "description": "Stores badge information.",
+          "params": [
+            {
+              "name": "badgeId",
+              "description": "The unique identifier for the badge."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure Authorization Independence and support the QAPs by adhering to the core design principles and strategy mandates outlined. Path-based ownership is used for user-specific data like UserProfile, GameHistory, and ExperimentResult. This means that a user's data is stored under their own `uid`, which simplifies security rules and makes them more efficient, eliminating the need for complex `get()` calls.\n\nThe `/topics/{topicId}/steps` collection is structured to store topic steps. The rules will need to validate `topicId` exists. Data requiring more complex authorization models, such as collaborative documents, will use membership maps (if necessary, although not apparent from the requirements).\n\nSegregation is used to separate data with different access needs, ensuring that all documents within a single collection share the same security posture. This approach simplifies security rules and prevents unintended data access. The design also takes into account the need for clear and predictable data models by enforcing consistent naming conventions and explicit state modeling."
+  }
+}

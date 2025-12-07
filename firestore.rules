@@ -1,0 +1,217 @@
+/**
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for all private user data,
+ * ensuring that users can only access their own information. All user-specific
+ * data, such as profiles, game history, and experiment results, is stored
+ * within a dedicated user-specific document tree.
+ *
+ * Data Structure:
+ * The data is organized into two main categories:
+ * 1. User-Private Data: Nested under `/users/{userId}/...`, this structure uses
+ *    path-based authorization to isolate each user's data. For example, a user's
+ *    game history is located at `/users/{userId}/history/{historyId}`.
+ * 2. Public Content: Top-level collections like `/badges`, `/topics`, and `/quizQuestions`
+ *    store content that is publicly readable by any user, including those who are not
+ *    signed in. Writes to these collections are disabled for clients to ensure data integrity.
+ *
+ * Key Security Decisions:
+ * - Default Deny: All paths are closed by default. Access is only granted explicitly.
+ * - User Isolation: Users are strictly forbidden from reading or writing to another
+ *   user's data tree. Listing the top-level `/users` collection is also disallowed.
+ * - Public Data is Read-Only: Collections intended for general consumption (`badges`,
+ *   `topics`, `quizQuestions`) are publicly readable but cannot be modified by clients.
+ *   Content management for these collections should be handled via a trusted backend service or
+ *   the Firebase console.
+ * - Relational Integrity: On creation of user-owned documents, rules enforce that
+ *   internal `userId` or `id` fields match the `userId` in the document path.
+ *   These fields are then enforced as immutable on update to prevent re-associating
+ *   documents with a different user.
+ *
+ * Denormalization for Authorization:
+ * This ruleset heavily relies on path-based ownership (`/users/{userId}/...`). The user's
+ * UID is part of the document path, which allows for fast, simple, and non-billable
+ * authorization checks without needing to read other documents (avoiding `get()` calls).
+ * Additionally, subcollection documents like `GameHistory` contain a denormalized `userId`
+ * field, which is validated against the path to ensure data consistency.
+ *
+ * Structural Segregation:
+ * Private data (`/users`) and public data (`/badges`, `/topics`, etc.) are stored in
+ * separate top-level collections. This clear separation ensures that security rules
+ * for one type of data do not inadvertently affect another, making the ruleset
+ * easier to understand, maintain, and secure.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Helper Functions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     * @param userId The user ID to check against the request's auth UID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if the user is the owner AND the document already exists.
+     * Crucial for preventing modification or deletion of non-existent documents.
+     * @param userId The user ID to check for ownership.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * Validates that the incoming document's 'id' field matches the user's UID.
+     * Enforces relational integrity on UserProfile creation.
+     * @param userId The user ID from the document path.
+     */
+    function hasValidUserProfileId(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * Enforces that the 'id' field of a UserProfile is immutable.
+     * Prevents changing the core identifier of a user's profile.
+     */
+    function isUserProfileIdImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    /**
+     * Validates that the incoming document's 'userId' field matches the user's UID.
+     * Enforces relational integrity on user subcollection document creation.
+     * @param userId The user ID from the document path.
+     */
+    function hasValidUserId(userId) {
+      return request.resource.data.userId == userId;
+    }
+
+    /**
+     * Enforces that the 'userId' field of a user subcollection document is immutable.
+     * Prevents re-assigning a document to a different user.
+     */
+    function isUserIdImmutable() {
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    // =========================================================================
+    // User-Specific Data Rules
+    // =========================================================================
+
+    /**
+     * @description Controls access to a user's own profile document.
+     * @path /users/{userId}
+     * @allow A signed-in user (auth.uid='user123') (create) their own profile at /users/user123.
+     * @deny An anonymous user (read) any profile. A user (auth.uid='userABC') (update) a profile at /users/userXYZ.
+     * @principle Restricts access to a user's own data tree and allows self-creation of a profile.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Disallow listing all users.
+      allow create: if isOwner(userId) && hasValidUserProfileId(userId);
+      allow update: if isExistingOwner(userId) && isUserProfileIdImmutable();
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Controls access to a user's game history records.
+       * @path /users/{userId}/history/{historyId}
+       * @allow A user (auth.uid='user123') (list) their own game history at /users/user123/history.
+       * @deny A user (auth.uid='userABC') (get) a history item at /users/userXYZ/history/item456.
+       * @principle Enforces document ownership for all operations within a user's private subcollection.
+       */
+      match /history/{historyId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidUserId(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Controls access to a user's experiment results.
+       * @path /users/{userId}/experiments/{experimentResultId}
+       * @allow A user (auth.uid='user123') (create) a new experiment result at /users/user123/experiments/exp789.
+       * @deny An anonymous user (list) any experiment results.
+       * @principle Enforces document ownership and validates relational integrity between the path and document data.
+       */
+      match /experiments/{experimentResultId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidUserId(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+
+    // =========================================================================
+    // Public Read-Only Content Rules
+    // =========================================================================
+
+    /**
+     * @description Publicly readable collection of topics. Client writes are disabled.
+     * @path /topics/{topicId}
+     * @allow Any user, including anonymous ones, (get) a topic document at /topics/math-basics.
+     * @deny Any user (create) a new topic document.
+     * @principle Provides public read access while protecting data integrity by disallowing client writes.
+     */
+    match /topics/{topicId} {
+      allow get, list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+
+      /**
+       * @description Publicly readable collection of steps within a topic.
+       * @path /topics/{topicId}/steps/{stepId}
+       * @allow Any user, including anonymous ones, (list) all steps for a topic.
+       * @deny Any user (update) a topic step.
+       * @principle Provides public read access to nested content while maintaining write protection.
+       */
+      match /steps/{stepId} {
+        allow get, list: if true;
+        allow create: if false;
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+
+    /**
+     * @description Publicly readable collection of quiz questions. Client writes are disabled.
+     * @path /quizQuestions/{questionId}
+     * @allow Any user, including anonymous ones, (get) a question at /quizQuestions/sci_q1.
+     * @deny Any user (delete) a question.
+     * @principle Provides public read access while protecting data integrity by disallowing client writes.
+     */
+    match /quizQuestions/{questionId} {
+      allow get, list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Publicly readable collection of badges. Client writes are disabled.
+     * @path /badges/{badgeId}
+     * @allow Any user, including anonymous ones, (list) all available badges.
+     * @deny Any user (create) a new badge.
+     * @principle Provides public read access while protecting data integrity by disallowing client writes.
+     */
+    match /badges/{badgeId} {
+      allow get, list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
