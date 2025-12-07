@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
   input: { schema: ChatbotInputSchema },
   output: { schema: ChatbotOutputSchema },
   model: googleAI.model('gemini-2.5-flash'),
-  prompt: `You are an expert educational assistant, powered by Gemini. Your mission is to help users learn and understand a wide variety of academic subjects.
+  prompt: `You are an expert educational assistant. Your mission is to help users learn and understand a wide variety of academic subjects.
 
   Adopt the persona of a helpful, patient, and engaging tutor. When a user asks a question, provide answers that are not only accurate but also clear, well-structured, and easy to comprehend.
 

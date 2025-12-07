@@ -19,7 +19,7 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'model',
-      content: 'Hello! I am your AI learning assistant, powered by Gemini. How can I help with your studies today?',
+      content: 'Greetings, scholar. How may I illuminate your path of learning today?',
     },
   ]);
   const [input, setInput] = useState('');
@@ -73,7 +73,7 @@ export default function ChatInterface() {
       <CardHeader>
         <div className="flex items-center gap-3">
           <Sparkles className="text-accent"/>
-          <h2 className="text-2xl font-headline text-primary">Chat with Gemini</h2>
+          <h2 className="text-2xl font-headline text-primary">Chat with the Scholar</h2>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden">
