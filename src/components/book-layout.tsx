@@ -24,6 +24,7 @@ import { signOut } from 'firebase/auth';
 
 const navItems = [
   { href: '/', icon: <LayoutDashboard />, text: 'Dashboard' },
+  { href: '/ai-chatbot', icon: <Bot />, text: 'Vedro AI Tutor' },
   { href: '/concept-builder', icon: <Puzzle />, text: 'Concept Builder' },
   { href: '/sandbox-experiment', icon: <FlaskConical />, text: 'Sandbox Experiment' },
   { href: '/running-quiz', icon: <Gamepad2 />, text: 'Running Quiz' },
