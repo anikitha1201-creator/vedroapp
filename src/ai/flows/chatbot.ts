@@ -4,7 +4,6 @@
  * This file defines the Genkit flow for Vedro AI, a structured educational assistant.
  */
 import { ai } from '@/ai/genkit';
-import { runGemini } from '../geminiClient';
 import {
   ChatbotInputSchema,
   LearningPackSchema,
@@ -12,14 +11,11 @@ import {
   type LearningPack,
 } from './chatbot.types';
 
-const chatbotFlow = ai.defineFlow(
-  {
-    name: 'chatbotFlow',
-    inputSchema: ChatbotInputSchema,
-    outputSchema: LearningPackSchema,
-  },
-  async (input) => {
-    const prompt = `
+const chatbotPrompt = ai.definePrompt({
+  name: 'chatbotPrompt',
+  input: { schema: ChatbotInputSchema },
+  output: { schema: LearningPackSchema },
+  prompt: `
       You are Vedro AI — an educational learning assistant designed to teach any concept clearly and simply.
       Your job is to explain any topic the student asks in a way that students aged 10 to 22 can easily understand.
 
@@ -27,7 +23,7 @@ const chatbotFlow = ai.defineFlow(
       ${JSON.stringify(LearningPackSchema.jsonSchema)}
 
       The topic to explain is:
-      ${input.message}
+      {{{message}}}
 
       All explanations must follow these rules:
       - Be accurate and student-friendly.
@@ -39,20 +35,26 @@ const chatbotFlow = ai.defineFlow(
       - Keep your tone helpful, clear, and supportive.
 
       Your role is ONLY education. Never produce entertainment content, jokes, or unrelated information. Stay fully academic.
-    `;
+    `,
+});
 
-    const text = await runGemini(prompt);
-    try {
-      // The AI is instructed to return a JSON string, so we parse it.
-      return JSON.parse(text) as LearningPack;
-    } catch (e) {
-      console.error('Failed to parse AI response as JSON:', e);
+export const chatbotFlow = ai.defineFlow(
+  {
+    name: 'chatbotFlow',
+    inputSchema: ChatbotInputSchema,
+    outputSchema: LearningPackSchema,
+  },
+  async (input) => {
+    const { output } = await chatbotPrompt(input);
+    if (!output) {
       throw new Error(
         "I'm sorry, I was unable to generate a learning pack for that topic. Please try another one."
       );
     }
+    return output;
   }
 );
+
 
 /**
  * An asynchronous function that takes a user's topic, sends it to the chatbot flow,
