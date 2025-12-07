@@ -15,6 +15,7 @@ import {
   LogOut,
   BookOpen,
   ArrowLeft,
+  Bot,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useAuth, useUser } from '@/firebase';
@@ -23,6 +24,7 @@ import { signOut } from 'firebase/auth';
 
 const navItems = [
   { href: '/', icon: <LayoutDashboard />, text: 'Dashboard' },
+  { href: '/ai-chatbot', icon: <Bot />, text: 'AI Chatbot' },
   { href: '/concept-builder', icon: <Puzzle />, text: 'Concept Builder' },
   { href: '/sandbox-experiment', icon: <FlaskConical />, text: 'Sandbox Experiment' },
   { href: '/running-quiz', icon: <Gamepad2 />, text: 'Running Quiz' },
