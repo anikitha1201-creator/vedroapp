@@ -1,3 +1,7 @@
+'use server';
+/**
+ * @fileOverview Type definitions for the Vedro AI Chatbot.
+ */
 import { z } from 'genkit';
 
 export const ChatbotInputSchema = z.object({
@@ -41,7 +45,6 @@ export const LearningPackSchema = z.object({
       'A mini quiz with 5 multiple-choice questions, each with 4 options and a marked correct answer.'
     ),
 });
-
 export type LearningPack = z.infer<typeof LearningPackSchema>;
 
 export const SimpleResponseSchema = z.object({

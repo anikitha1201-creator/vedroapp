@@ -9,7 +9,6 @@ import {
   ChatbotOutputSchema,
   type ChatbotInput,
   type ChatbotOutput,
-  type LearningPack,
 } from './chatbot.types';
 
 const chatbotPrompt = ai.definePrompt({
@@ -56,7 +55,6 @@ export const chatbotFlow = ai.defineFlow(
     return output;
   }
 );
-
 
 /**
  * An asynchronous function that takes a user's topic, sends it to the chatbot flow,
