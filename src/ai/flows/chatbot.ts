@@ -9,6 +9,7 @@ import {
   LearningPackSchema,
   type ChatbotInput,
   type ChatbotOutput,
+  type LearningPack,
 } from './chatbot.types';
 
 const chatbotPrompt = ai.definePrompt({
@@ -70,7 +71,7 @@ export const chatbotFlow = ai.defineFlow(
  */
 export async function getChatbotResponse(
   input: ChatbotInput
-): Promise<ChatbotOutput> {
+): Promise<LearningPack> {
   try {
     const result = await chatbotFlow(input);
     return result;
