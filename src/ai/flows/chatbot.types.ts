@@ -40,21 +40,5 @@ export const LearningPackSchema = z.object({
   miniQuiz: z
     .array(QuizQuestionSchema)
     .length(5)
-    // TODO: The model is failing to generate this sometimes. Relaxing the constraints.
-    // .describe(
-    //   'A mini quiz with 5 multiple-choice questions, each with 4 options and a marked correct answer.'
-    // ),
 });
 export type LearningPack = z.infer<typeof LearningPackSchema>;
-
-export const SimpleResponseSchema = z.object({
-  reply: z.string().describe('A simple conversational reply.'),
-});
-export type SimpleResponse = z.infer<typeof SimpleResponseSchema>;
-
-// The final output can be a LearningPack or a SimpleResponse
-export const ChatbotOutputSchema = z.union([
-  LearningPackSchema.transform(val => ({ type: 'learningPack' as const, data: val })),
-  SimpleResponseSchema.transform(val => ({ type: 'simpleReply' as const, data: val })),
-]);
-export type ChatbotOutput = z.infer<typeof ChatbotOutputSchema>;

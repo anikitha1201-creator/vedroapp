@@ -6,23 +6,19 @@
 import { ai } from '@/ai/genkit';
 import {
   ChatbotInputSchema,
-  ChatbotOutputSchema,
-  type ChatbotInput,
-  type ChatbotOutput,
   LearningPackSchema,
+  type ChatbotInput,
+  type LearningPack,
 } from './chatbot.types';
 
 const chatbotPrompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: { schema: ChatbotInputSchema },
-  output: { schema: ChatbotOutputSchema },
+  output: { schema: LearningPackSchema },
   prompt: `
       You are Vedro AI — an educational learning assistant designed to teach any concept clearly and simply.
       Your job is to explain any topic the student asks in a way that students aged 10 to 22 can easily understand.
-
-      IMPORTANT: Your response format depends on the user's message.
-      1. If the user gives a simple greeting (like "hello", "hi", "hey there"), you MUST return a simple, friendly greeting using the 'SimpleResponse' format. For example: { "reply": "Hello there! What would you like to learn about today?" }.
-      2. For any other topic or question, you MUST return one structured 'LearningPack' in the exact JSON format defined by the output schema.
+      You MUST return one structured 'LearningPack' in the exact JSON format defined by the output schema.
 
       The topic to explain is:
       {{{message}}}
@@ -36,7 +32,7 @@ const chatbotPrompt = ai.definePrompt({
       - Focus on helping the student understand.
       - Keep your tone helpful, clear, and supportive.
 
-      Your role is ONLY education. Never produce entertainment content, jokes, or unrelated information. Stay fully academic unless providing a simple greeting.
+      Your role is ONLY education. Never produce entertainment content, jokes, or unrelated information.
     `,
 });
 
@@ -44,7 +40,7 @@ export const chatbotFlow = ai.defineFlow(
   {
     name: 'chatbotFlow',
     inputSchema: ChatbotInputSchema,
-    outputSchema: ChatbotOutputSchema,
+    outputSchema: LearningPackSchema,
   },
   async (input) => {
     const { output } = await chatbotPrompt(input);
@@ -59,14 +55,14 @@ export const chatbotFlow = ai.defineFlow(
 
 /**
  * An asynchronous function that takes a user's topic, sends it to the chatbot flow,
- * and returns a structured learning pack or a simple reply.
+ * and returns a structured learning pack.
  *
  * @param {ChatbotInput} input - The user's topic/message.
- * @returns {Promise<ChatbotOutput>} The structured learning pack or simple reply.
+ * @returns {Promise<LearningPack>} The structured learning pack.
  */
 export async function getChatbotResponse(
   input: ChatbotInput
-): Promise<ChatbotOutput> {
+): Promise<LearningPack> {
   try {
     const result = await chatbotFlow(input);
     return result;
