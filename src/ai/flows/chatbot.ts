@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 const ChatbotInputSchema = z.object({
@@ -38,6 +39,7 @@ const prompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: { schema: ChatbotInputSchema },
   output: { schema: ChatbotOutputSchema },
+  model: googleAI.model('gemini-2.5-flash'),
   prompt: `You are Vedro AI, an AI chatbot designed to help students with their learning needs.
 
   You can solve doubts, provide explanations, generate summaries, and create MCQs based on the user's query.
