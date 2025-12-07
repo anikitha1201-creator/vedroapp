@@ -1,7 +1,9 @@
 
 'use server';
 
-import { getChatbotResponse, type ChatbotInput } from '@/ai/flows/chatbot';
+import { getChatbotResponse } from '@/ai/flows/chatbot';
+import type { ChatbotInput } from '@/ai/flows/chatbot.types';
+
 
 const MAX_RETRIES = 3;
 const INITIAL_DELAY_MS = 1000;

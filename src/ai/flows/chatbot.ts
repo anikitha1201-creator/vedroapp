@@ -7,24 +7,13 @@
  * educational assistant inspired by Gemini mini.
  *
  * - getChatbotResponse - The main function that interacts with the Gemini model.
- * - ChatbotInput - The input schema for the chatbot.
- * - ChatbotOutput - The output schema for the chatbot.
  */
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { z } from 'genkit';
 import { marked } from 'marked';
+import { ChatbotInputSchema, ChatbotOutputSchema, type ChatbotInput, type ChatbotOutput } from './chatbot.types';
 
-export const ChatbotInputSchema = z.object({
-  message: z.string().describe('The user\'s message to the chatbot.'),
-});
-export type ChatbotInput = z.infer<typeof ChatbotInputSchema>;
-
-export const ChatbotOutputSchema = z.object({
-  response: z.string().describe('The AI\'s response, formatted as Markdown.'),
-});
-export type ChatbotOutput = z.infer<typeof ChatbotOutputSchema>;
 
 /**
  * An asynchronous function that takes a user's input, sends it to the chatbot flow,
