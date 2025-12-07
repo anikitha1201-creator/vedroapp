@@ -47,6 +47,19 @@ export const chatbotFlow = ai.defineFlow(
     outputSchema: LearningPackSchema,
   },
   async input => {
+    // Handle simple greetings separately
+    const message = input.message.toLowerCase().trim();
+    const greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening'];
+    if (greetings.includes(message)) {
+      return {
+        simpleSummary: "Hi! What would you like to learn about today?",
+        keyLearningPoints: [],
+        stepByStepExplanation: [],
+        causeEffectInfo: '',
+        miniQuiz: [],
+      };
+    }
+
     const { output } = await chatbotPrompt(input);
     if (!output) {
       throw new Error(
