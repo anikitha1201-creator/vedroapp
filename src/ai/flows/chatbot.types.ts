@@ -43,3 +43,15 @@ export const LearningPackSchema = z.object({
 });
 
 export type LearningPack = z.infer<typeof LearningPackSchema>;
+
+export const SimpleResponseSchema = z.object({
+  reply: z.string().describe('A simple conversational reply.'),
+});
+export type SimpleResponse = z.infer<typeof SimpleResponseSchema>;
+
+// The final output can be a LearningPack or a SimpleResponse
+export const ChatbotOutputSchema = z.union([
+  LearningPackSchema.transform(val => ({ type: 'learningPack' as const, data: val })),
+  SimpleResponseSchema.transform(val => ({ type: 'simpleReply' as const, data: val })),
+]);
+export type ChatbotOutput = z.infer<typeof ChatbotOutputSchema>;

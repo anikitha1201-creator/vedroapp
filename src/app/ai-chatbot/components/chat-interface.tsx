@@ -8,9 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Bot, ChevronRight, HelpCircle, Loader2, Send, User, Check, X } from 'lucide-react';
-import type { LearningPack, QuizQuestionSchema } from '@/ai/flows/chatbot.types';
-import { Badge } from '@/components/ui/badge';
+import { Bot, ChevronRight, FilePlus, Loader2, Send, User, Check, X, Eraser, PlusSquare } from 'lucide-react';
+import type { LearningPack, QuizQuestionSchema, ChatbotOutput } from '@/ai/flows/chatbot.types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { z } from 'zod';
@@ -18,10 +17,10 @@ import { z } from 'zod';
 type Message = {
   id: string;
   role: 'user' | 'assistant';
-  content: string | LearningPack;
+  content: string | ChatbotOutput;
 };
 
-// --- Main Component ---
+// --- Sub Components ---
 
 const MiniQuiz = ({ quiz }: { quiz: z.infer<typeof QuizQuestionSchema>[] }) => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -110,6 +109,24 @@ const LearningPackDisplay = ({ pack }: { pack: LearningPack }) => {
   )
 };
 
+const AssistantMessage = ({ content }: { content: ChatbotOutput | string }) => {
+    if (typeof content === 'string') {
+        return <p>{content}</p>;
+    }
+
+    if (content.type === 'learningPack') {
+        return <LearningPackDisplay pack={content.data} />;
+    }
+
+    if (content.type === 'simpleReply') {
+        return <p>{content.data.reply}</p>;
+    }
+    
+    return <p>Sorry, I received a response I don't understand.</p>;
+};
+
+// --- Main Component ---
+
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -157,6 +174,16 @@ export default function ChatInterface() {
     handleSendMessage(inputValue);
   };
 
+  const clearChat = () => {
+      setMessages([]);
+  }
+
+  const newChat = () => {
+      setMessages([]);
+      // Potentially you could also reset some session state on the server here
+      // For now, we just clear the client
+  }
+
   return (
     <div className="flex flex-col h-[75vh] max-w-4xl mx-auto bg-card rounded-lg burnt-edge">
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
@@ -169,7 +196,7 @@ export default function ChatInterface() {
                 <div>
                   <p className="font-semibold text-primary">Vedro AI</p>
                   <div className="prose-sm max-w-none text-foreground">
-                    <p>What concept would you like to learn about today?</p>
+                    <p>Hello! Ask me about a concept you'd like to learn, like 'Photosynthesis' or 'Newton's Laws'.</p>
                   </div>
                 </div>
             </div>
@@ -196,15 +223,15 @@ export default function ChatInterface() {
                     : 'bg-primary/5 w-full'
                 )}
               >
-                {typeof message.content === 'string' ? (
-                     <div
-                        className="prose prose-sm dark:prose-invert max-w-none"
-                    >
-                      {message.role === 'user' ? message.content : <p>{message.content}</p>}
-                    </div>
-                ): (
-                    <LearningPackDisplay pack={message.content} />
-                )}
+                <div
+                    className="prose prose-sm dark:prose-invert max-w-none"
+                >
+                  {message.role === 'user' ? (
+                      <p>{message.content as string}</p>
+                  ) : (
+                      <AssistantMessage content={message.content} />
+                  )}
+                </div>
               </div>
               {message.role === 'user' && (
                 <Avatar className="h-9 w-9">
@@ -228,13 +255,13 @@ export default function ChatInterface() {
           )}
         </div>
       </ScrollArea>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-2">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <Input
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask about a concept, like 'Photosynthesis' or 'Newton's Laws'..."
+            placeholder="Ask about a concept, or just say hello..."
             className="flex-1"
             disabled={isLoading}
           />
@@ -243,6 +270,11 @@ export default function ChatInterface() {
             <span className="sr-only">Send</span>
           </Button>
         </form>
+         <div className="flex items-center justify-start gap-2">
+            <Button onClick={newChat} variant="outline" size="sm" className="wax-press text-xs"><PlusSquare size={14}/> New Chat</Button>
+            <Button onClick={clearChat} variant="outline" size="sm" className="wax-press text-xs"><Eraser size={14}/> Clear</Button>
+            <Button variant="outline" size="sm" className="wax-press text-xs"><FilePlus size={14}/> Add File</Button>
+        </div>
       </div>
     </div>
   );
