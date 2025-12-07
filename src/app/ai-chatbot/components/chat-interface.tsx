@@ -136,15 +136,15 @@ const AssistantMessage = ({ content }: { content: ChatbotOutput | string }) => {
         return <p>{content}</p>;
     }
     
-    // Check if this is a "greeting" response
-    // A greeting has an empty keyLearningPoints array
+    // A greeting response is identified by having an empty `keyLearningPoints` array.
     const isGreeting = !content.keyLearningPoints || content.keyLearningPoints.length === 0;
 
     if (isGreeting) {
+      // If it's a greeting, only render the simple summary text.
       return <p>{content.simpleSummary}</p>;
     }
     
-    // Otherwise, render the full learning pack
+    // Otherwise, render the full, structured learning pack.
     return <LearningPackDisplay pack={content} />;
 };
 
@@ -253,6 +253,7 @@ export default function ChatInterface() {
   const handleNewChat = () => {
     setMessages([]);
     setAttachedFile(null);
+    inputRef.current?.focus();
   }
 
   const handleClearChat = () => {
@@ -388,5 +389,3 @@ export default function ChatInterface() {
     </div>
   );
 }
-
-    
