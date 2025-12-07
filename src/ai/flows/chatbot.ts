@@ -39,6 +39,10 @@ const ChatbotOutputSchema = z.object({
 });
 export type ChatbotOutput = z.infer<typeof ChatbotOutputSchema>;
 
+// We create a union type to allow either the structured learning pack or a simple string.
+const ChatbotResponseSchema = z.union([ChatbotOutputSchema, z.string()]);
+
+
 export async function getChatbotResponse(
   input: ChatbotInput
 ): Promise<any> {
@@ -77,17 +81,17 @@ const chatbotFlow = ai.defineFlow(
   {
     name: 'chatbotFlow',
     inputSchema: ChatbotInputSchema,
-    outputSchema: ChatbotOutputSchema,
+    // The flow can now output either the structured object or a simple string.
+    outputSchema: ChatbotResponseSchema,
   },
   async (input) => {
     // Check if the prompt is a simple greeting or off-topic, and handle it gracefully
-    const lowerCasePrompt = input.prompt.toLowerCase();
+    const lowerCasePrompt = input.prompt.toLowerCase().trim();
     const isGreeting = ['hi', 'hello', 'hey'].includes(lowerCasePrompt);
-    const isGeneric = ['how are you?', 'who are you?', 'what can you do?'].includes(lowerCasePrompt);
+    const isGeneric = ['how are you?', 'who are you?', 'what can you do?', 'what is this?'].includes(lowerCasePrompt);
 
     if (isGreeting || isGeneric) {
-      // This is a simplified response that doesn't fit the structured learning pack.
-      // We are returning a string directly, which the frontend will need to handle.
+      // Return a simple string response directly, which fits the updated output schema.
       return "Greetings, seeker of knowledge. I am Vedro. Ask me about any educational topic, and I shall provide a structured learning pack to illuminate your path.";
     }
 
