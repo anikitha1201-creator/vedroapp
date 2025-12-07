@@ -16,6 +16,7 @@ import {
 } from './chatbot.types';
 import { z } from 'zod';
 
+// Regex to detect simple greetings
 const greetingRegex = /^(hi|hello|hey|good morning|good afternoon|good evening)(\s.|\s!|\s?|)$/i;
 
 const chatbotPrompt = ai.definePrompt({
@@ -51,7 +52,7 @@ RESPONSE INSTRUCTIONS
     - simpleSummary: A clear, concise summary of the topic (3–5 sentences).
     - keyLearningPoints: Provide 3–5 important points as a list of strings.
     - stepByStepExplanation: Provide 3-6 logical steps to explain the concept.
-    - causeEffectInfo: Provide a short paragraph (2-4 sentences) explaining a key cause and effect relationship.
+    - causeEffectInfo: A short paragraph (2-4 sentences) on a cause and effect relationship.
     - miniQuiz: Provide 3 multiple-choice questions. Each question must have:
       - question (string)
       - options (an array of 4 strings)
@@ -97,7 +98,12 @@ export const chatbotFlow = ai.defineFlow(
         return { type: 'learningPack', data: output };
     }
     
-    // This case should technically not be hit if it's not a greeting, but it's a safe fallback.
+    // This case handles when the model replies with a simple reply even if it wasn't a greeting
+    if ('reply' in output) {
+        return { type: 'simpleReply', data: output };
+    }
+
+    // Fallback for unexpected shapes
     return { type: 'simpleReply', data: { reply: "I'm not sure how to respond to that. Please ask me about a topic." } };
   }
 );
