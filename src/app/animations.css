@@ -146,3 +146,33 @@
     transform-origin: left;
   }
 }
+
+/* Falling Scroll animation */
+@keyframes fall {
+  from {
+    transform: translateY(-100%) rotate(-15deg);
+  }
+  to {
+    transform: translateY(100vh) rotate(15deg);
+  }
+}
+
+/* Catch animation */
+@keyframes catch-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px 5px hsla(var(--accent) / 0);
+  }
+  50% {
+    box-shadow: 0 0 30px 15px hsla(var(--accent) / 0.7);
+  }
+}
+
+/* Timer bar animation */
+@keyframes timer-drain {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
