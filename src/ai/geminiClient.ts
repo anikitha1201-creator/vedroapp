@@ -8,7 +8,7 @@ if (!API_KEY) {
 }
 
 // You can change this later if needed, but keep it valid for v1:
-export const MODEL_ID = 'gemini-1.5-flash';
+const MODEL_ID = 'gemini-1.5-flash';
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: MODEL_ID });
