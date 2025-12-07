@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview An AI chatbot for students to solve doubts, get explanations, receive summaries, and generate MCQs.
+ * @fileOverview An AI chatbot that acts as a helpful assistant, powered by Gemini.
  *
  * - getChatbotResponse - A function that handles the chatbot functionality.
  * - ChatbotInput - The input type for the getChatbotResponse function.
@@ -40,17 +40,10 @@ const prompt = ai.definePrompt({
   input: { schema: ChatbotInputSchema },
   output: { schema: ChatbotOutputSchema },
   model: googleAI.model('gemini-2.5-flash'),
-  prompt: `You are Vedro AI, an AI chatbot designed to help students with their learning needs.
-
-  You can solve doubts, provide explanations, generate summaries, and create MCQs based on the user's query.
-
-  If the user asks a question, provide a clear and concise answer.
-  If the user asks for an explanation, provide a detailed explanation.
-  If the user asks for a summary, provide a comprehensive summary.
-  If the user asks for MCQs, generate multiple-choice questions with options and the correct answer.
+  prompt: `You are a helpful and creative AI assistant, powered by Gemini. 
   
-  Keep your tone helpful, clear, and supportive.
-
+  Your goal is to provide accurate, helpful, and engaging responses to the user's queries.
+  
   Conversation History:
   {{#each history}}
   {{role}}: {{content}}

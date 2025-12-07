@@ -19,7 +19,7 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'model',
-      content: 'Greetings, seeker of knowledge. I am Vedro. How may I illuminate your path today?',
+      content: 'Hello! I am an AI assistant powered by Gemini. How can I help you today?',
     },
   ]);
   const [input, setInput] = useState('');
@@ -73,7 +73,7 @@ export default function ChatInterface() {
       <CardHeader>
         <div className="flex items-center gap-3">
           <Sparkles className="text-accent"/>
-          <h2 className="text-2xl font-headline text-primary">Vedro AI</h2>
+          <h2 className="text-2xl font-headline text-primary">Chat with Gemini</h2>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden">
@@ -94,7 +94,7 @@ export default function ChatInterface() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="What concept shall we unravel today? (e.g., Photosynthesis, Pythagoras Theorem...)"
+            placeholder="Ask me anything..."
             disabled={isLoading}
             className="flex-1"
           />
