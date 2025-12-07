@@ -38,7 +38,7 @@ const chatbotPrompt = ai.definePrompt({
     Your role is ONLY education. Never produce entertainment content, jokes, or unrelated information. Stay fully academic.
   `,
   config: {
-    model: 'gemini-1.5-flash',
+    model: 'gemini-1.5-pro-latest',
   },
 });
 
