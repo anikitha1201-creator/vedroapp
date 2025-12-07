@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Vedro AI Chatbot Flow
@@ -27,7 +28,10 @@ export async function getChatbotResponse(
   return result;
 }
 
-const chatbotModel = googleAI.model('gemini-1.5-flash-latest');
+// To switch models, you can change the string here.
+// For example, to use a more powerful model, you might use 'gemini-1.5-pro'.
+// Ensure the model name is compatible with the API version you are using.
+const chatbotModel = googleAI.model('gemini-1.5-flash');
 
 const prompt = ai.definePrompt({
   name: 'vedroEducationalPrompt',
@@ -52,8 +56,6 @@ const prompt = ai.definePrompt({
     - Keep your tone helpful, clear, and supportive.
 
     Your role is ONLY education. Never produce entertainment content, jokes, or unrelated information. Stay fully academic.
-
-    Generate the learning pack now based on the user's topic.
   `,
 });
 
