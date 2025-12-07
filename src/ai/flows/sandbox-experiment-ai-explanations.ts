@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview AI explanations for the Sandbox Experiment.
@@ -37,7 +38,7 @@ const prompt = ai.definePrompt({
   name: 'experimentExplanationPrompt',
   input: {schema: ExperimentExplanationInputSchema},
   output: {schema: ExperimentExplanationOutputSchema},
-  model: googleAI.model('gemini-2.5-flash'),
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an expert science teacher with the persona of a wise, ancient alchemist. A student is using an interactive sandbox and has just performed an experiment.
 
 Your task is to provide a clear, engaging, and educational explanation of the reaction that occurred.
@@ -76,10 +77,15 @@ const experimentExplanationFlow = ai.defineFlow(
     outputSchema: ExperimentExplanationOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    if (!output) {
-      return {explanation: "### The Alchemist Ponders...\nThe mixture is inert, like a silent stone in a forgotten library. No reaction occurred with these elements. Perhaps try combining different ingredients from the scrolls?"}
+    try {
+        const {output} = await prompt(input);
+        if (!output) {
+          throw new Error("Flow produced no output.");
+        }
+        return output;
+    } catch (error) {
+        console.error("Error in experimentExplanationFlow:", error);
+        return {explanation: "### The Alchemist Ponders...\nThe mixture is inert, like a silent stone in a forgotten library. No reaction occurred with these elements. Perhaps try combining different ingredients from the scrolls?"}
     }
-    return output;
   }
 );
