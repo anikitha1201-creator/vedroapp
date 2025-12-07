@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Check, Flame, X, Trophy, Repeat, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
+import { Check, Flame, X, Trophy, Repeat, ChevronLeft, ChevronRight, BookOpen, Footprints } from 'lucide-react';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 
 const questions = [
@@ -48,15 +48,15 @@ const questions = [
 type GameState = 'start' | 'playing' | 'question' | 'result' | 'end';
 type ResultState = 'correct' | 'incorrect' | null;
 
-const Lane = ({ option, onClick, result, answer, disabled }: { option: string, onClick: () => void, result: ResultState, answer: string, disabled: boolean }) => (
+const Lane = ({ option, onClick, result, answer, disabled, isSelected }: { option: string, onClick: () => void, result: ResultState, answer: string, disabled: boolean, isSelected: boolean }) => (
     <div
         onClick={!disabled ? onClick : undefined}
         className={cn(
             "relative flex items-center justify-center h-48 p-4 rounded-lg border-2 border-dashed transition-all duration-300 cursor-pointer group burnt-edge",
             "border-primary/20 hover:border-accent hover:bg-accent/10",
             disabled && "cursor-not-allowed opacity-60",
-            result && option === answer && "border-accent bg-accent/20 scale-105",
-            result && option !== answer && "border-destructive bg-destructive/10"
+            isSelected && result === 'correct' && "border-accent bg-accent/20 scale-105 gold-burst",
+            isSelected && result === 'incorrect' && "border-destructive bg-destructive/10 scale-105 red-ink-splash"
         )}
     >
         <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"></div>
@@ -64,15 +64,26 @@ const Lane = ({ option, onClick, result, answer, disabled }: { option: string, o
     </div>
 );
 
+const Character = ({ lane }: { lane: number }) => {
+    const lanePositions = ['-translate-x-full', 'translate-x-0', 'translate-x-full'];
+    return (
+        <div className={cn("absolute bottom-8 left-1/2 -ml-6 transition-transform duration-300 ease-in-out", lanePositions[lane])}>
+            <Footprints className="w-12 h-12 text-primary" />
+        </div>
+    )
+}
 
 export default function QuizRunnerClient() {
   const [gameState, setGameState] = useState<GameState>('start');
   const [shuffledQuestions, setShuffledQuestions] = useState(questions);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [speed, setSpeed] = useState(1);
   const [result, setResult] = useState<ResultState>(null);
   const [runProgress, setRunProgress] = useState(0);
+  const [characterLane, setCharacterLane] = useState(1); // 0: left, 1: middle, 2: right
+  const [selectedAnswer, setSelectedAnswer] = useState<string|null>(null);
+
 
   const currentQuestion = useMemo(() => shuffledQuestions[questionIndex], [shuffledQuestions, questionIndex]);
 
@@ -80,24 +91,6 @@ export default function QuizRunnerClient() {
   const shuffleQuestions = () => {
     setShuffledQuestions(prev => [...prev].sort(() => Math.random() - 0.5));
   }
-
-  // Main game loop timer
-  useEffect(() => {
-    if (gameState !== 'playing' && gameState !== 'question') return;
-
-    if (timeLeft <= 0) {
-      if (gameState === 'question') {
-        handleAnswer(null); // Time's up for the question
-      }
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [gameState, timeLeft]);
 
   // Runner progress timer
   useEffect(() => {
@@ -110,15 +103,14 @@ export default function QuizRunnerClient() {
       setRunProgress(prev => {
         if (prev >= 100) {
           setGameState('question');
-          setTimeLeft(15); // Reset timer for question
           return 100;
         }
-        return prev + 2; // Speed of the runner
+        return prev + speed; // Use speed to control progress
       });
     }, 100);
 
     return () => clearInterval(progressInterval);
-  }, [gameState]);
+  }, [gameState, speed]);
 
 
   const startGame = () => {
@@ -127,18 +119,26 @@ export default function QuizRunnerClient() {
     setScore(0);
     setResult(null);
     setRunProgress(0);
+    setSpeed(1);
+    setCharacterLane(1);
     setGameState('playing');
-    setTimeLeft(100); // Total game time
   };
 
-  const handleAnswer = (selectedOption: string | null) => {
+  const handleAnswer = (selectedOption: string, laneIndex: number) => {
+    if (gameState !== 'question') return;
+    
+    setCharacterLane(laneIndex);
+    setSelectedAnswer(selectedOption);
     setGameState('result');
+    
     if (selectedOption === currentQuestion.answer) {
       setResult('correct');
-      setScore(prev => prev + 100 + timeLeft * 5); // Score bonus for speed
+      setScore(prev => prev + 100 * speed); // Score bonus for speed
+      setSpeed(prev => Math.min(prev + 0.2, 3)); // Speed boost
     } else {
       setResult('incorrect');
       setScore(prev => Math.max(0, prev - 50)); // Penalty
+      setSpeed(prev => Math.max(prev - 0.5, 0.5)); // Speed drop
     }
 
     setTimeout(() => {
@@ -146,6 +146,7 @@ export default function QuizRunnerClient() {
         setQuestionIndex(prev => prev + 1);
         setRunProgress(0);
         setResult(null);
+        setSelectedAnswer(null);
         setGameState('playing');
       } else {
         setGameState('end');
@@ -178,7 +179,7 @@ export default function QuizRunnerClient() {
           <CardTitle className="text-3xl">Run Complete!</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-4xl font-bold text-accent mb-2">{score}</p>
+          <p className="text-4xl font-bold text-accent mb-2">{Math.round(score)}</p>
           <p className="text-muted-foreground mb-6">A scholar's mind is sharpened by challenge.</p>
           <Button onClick={startGame} size="lg" className="wax-press">
             <Repeat className="mr-2"/>
@@ -198,21 +199,25 @@ export default function QuizRunnerClient() {
       
       {/* HUD */}
       <div className="flex justify-between items-center mb-4 text-lg font-bold">
-        <div className="text-primary">Score: {score}</div>
-        <div className={cn("text-accent flex items-center gap-1", gameState === 'question' && 'animate-pulse')}>
-            <Flame size={20}/> {gameState === 'question' ? `Time: ${timeLeft}` : `Run: ${100 - runProgress}%`}
+        <div className="text-primary">Score: {Math.round(score)}</div>
+        <div className={cn("text-accent flex items-center gap-1")}>
+            <Flame size={20}/> Speed: x{speed.toFixed(1)}
         </div>
       </div>
       
        {/* Runner Track */}
-       <div className="w-full h-4 bg-primary/10 rounded-full mb-6 border border-primary/20">
-         <div className="h-full bg-accent rounded-full transition-all duration-100 linear" style={{ width: `${runProgress}%` }}></div>
-         <div className="w-4 h-6 bg-primary rounded-md -mt-5 relative transition-all duration-100" style={{left: `calc(${runProgress}% - 8px)`}}></div>
+       <div className="relative w-full h-24 bg-primary/10 rounded-lg mb-6 border border-primary/20 overflow-hidden">
+         <div className="absolute top-0 left-0 h-full w-full speed-lines-bg"></div>
+         <div className="absolute top-1/2 -mt-3 left-0 w-full h-6">
+            <Character lane={characterLane}/>
+         </div>
+         <div className="absolute bottom-2 left-2 text-primary font-bold">
+            PROGRESS: {(runProgress).toFixed(0)}%
+         </div>
       </div>
 
-
       {/* Question and Path Area */}
-      <div className={cn("transition-all duration-500", !isAnswering && "opacity-20 blur-sm")}>
+      <div className={cn("transition-all duration-500", !isAnswering && "opacity-20 blur-sm pointer-events-none")}>
          <Card className="text-center mb-6 burnt-edge-pulse">
             <CardHeader>
                 <CardDescription>Question {questionIndex + 1} of {shuffledQuestions.length}</CardDescription>
@@ -220,21 +225,22 @@ export default function QuizRunnerClient() {
             </CardHeader>
              {gameState === 'result' && (
                 <CardContent className="animate-ink-fade-in">
-                    <p className="text-accent font-semibold">{result === 'correct' ? 'Correct!' : 'Not quite!'}</p>
+                    <p className={cn("font-semibold", result === 'correct' ? 'text-accent' : 'text-destructive')}>{result === 'correct' ? 'Correct!' : 'Not quite!'}</p>
                     <p className="text-muted-foreground text-sm mt-1">{currentQuestion.explanation}</p>
                 </CardContent>
              )}
          </Card>
 
         <div className="grid grid-cols-3 gap-4">
-            {currentQuestion.options.map((option) => (
+            {currentQuestion.options.map((option, index) => (
               <Lane
                 key={option}
                 option={option}
-                onClick={() => handleAnswer(option)}
+                onClick={() => handleAnswer(option, index)}
                 disabled={gameState !== 'question'}
                 result={result}
                 answer={currentQuestion.answer}
+                isSelected={selectedAnswer === option}
               />
             ))}
         </div>

@@ -126,9 +126,9 @@
 /* Speed Lines Animation */
 @keyframes speed-lines {
     0% {
-        transform: translateX(-100%);
+        background-position: 0 0;
     }
     100% {
-        transform: translateX(100%);
+        background-position: -100px 0;
     }
 }
