@@ -12,8 +12,8 @@
   }
 }
 
-/* Blue Glow Animation */
-@keyframes blue-glow {
+/* Burnt-Edge Pulse Glow Animation */
+@keyframes burnt-edge-glow {
   0% {
     box-shadow: 
       0 0 5px 2px hsla(var(--accent) / 0.4),
@@ -22,7 +22,7 @@
   50% {
     box-shadow: 
       0 0 15px 5px hsla(var(--accent) / 0.7),
-      0 0 3px 1px hsl(var(--border));
+      0 0 5px 2px hsl(var(--border));
   }
   100% {
     box-shadow: 
@@ -31,15 +31,15 @@
   }
 }
 
-/* Subtle Glow Animation */
-@keyframes subtle-glow {
+/* Torch Flicker Glow Animation */
+@keyframes torch-flicker-glow {
   0%, 100% {
-    opacity: 0.05;
-    box-shadow: 0 0 20px 10px hsla(var(--accent) / 0.1);
+    opacity: 0.08;
+    box-shadow: 0 0 20px 10px hsla(var(--accent) / 0.05);
   }
   50% {
-    opacity: 0.1;
-    box-shadow: 0 0 25px 12px hsla(var(--accent) / 0.15);
+    opacity: 0.15;
+    box-shadow: 0 0 25px 12px hsla(var(--accent) / 0.1);
   }
 }
 
@@ -58,44 +58,38 @@
   }
 }
 
-/* Caret Blinking for Typing Effect */
+/* Caret Blinking for Quill Writing Effect */
 @keyframes caret-blink {
   50% {
     border-color: transparent;
   }
 }
 
-/* Correct Answer Celebration Animation */
-@keyframes correct-celebration {
+/* Gold Burst - Correct Answer Celebration Animation */
+@keyframes gold-burst-anim {
   0% {
     transform: scale(1);
+    box-shadow: 0 0 0 0 hsla(var(--accent) / 0);
   }
   50% {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px 10px hsla(var(--accent) / 0.5);
+    transform: scale(1.05);
+    box-shadow: 0 0 25px 15px hsla(var(--accent) / 0.5);
   }
   100% {
     transform: scale(1);
+    box-shadow: 0 0 0 0 hsla(var(--accent) / 0);
   }
 }
 
-/* Incorrect Answer Penalty Animation */
-@keyframes incorrect-penalty {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-5px);
-  }
-  40% {
-    transform: translateX(5px);
-  }
-  60% {
-    transform: translateX(-5px);
-  }
-  80% {
-    transform: translateX(5px);
-  }
+/* Red Ink Splash - Incorrect Answer Penalty Animation */
+@keyframes red-ink-splash-anim {
+  0% { transform: translateX(0); }
+  10% { transform: translateX(-5px) rotate(-2deg); }
+  20% { transform: translateX(5px) rotate(2deg); }
+  30% { transform: translateX(-5px) rotate(-2deg); }
+  40% { transform: translateX(5px) rotate(2deg); }
+  50% { transform: translateX(0); box-shadow: 0 0 20px 5px hsla(var(--destructive)/0.5); }
+  100% { box-shadow: 0 0 0 0 hsla(var(--destructive)/0); }
 }
 
 /* Speed Lines Animation */
@@ -108,7 +102,7 @@
     }
 }
 
-/* Simple Bounce-in animation */
+/* Bounce-in animation for modals/cards */
 @keyframes bounce-in {
   0% {
     opacity: 0;

@@ -7,48 +7,48 @@
 
 @layer base {
   :root {
-    --background: 220 40% 95%; /* Light Blue-Gray */
-    --foreground: 225 25% 15%; /* Dark Blue */
-    --card: 220 30% 100%;
-    --card-foreground: 225 25% 15%;
-    --popover: 220 30% 100%;
-    --popover-foreground: 225 25% 15%;
-    --primary: 217 71% 53%; /* Blue (#4A90E2) */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 215 50% 90%;
-    --secondary-foreground: 217 71% 53%;
-    --muted: 220 30% 90%;
-    --muted-foreground: 225 10% 40%;
-    --accent: 210 90% 60%;
-    --accent-foreground: 225 25% 15%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 85%;
-    --input: 220 20% 85%;
-    --ring: 217 71% 53%;
+    --background: 33 28% 90%; /* Parchment Light Yellow: #E6D7B8 */
+    --foreground: 28 44% 18%; /* Dark Brown: #5C3A21 */
+    --card: 33 28% 93%; /* Lighter Parchment */
+    --card-foreground: 28 44% 18%;
+    --popover: 33 28% 93%;
+    --popover-foreground: 28 44% 18%;
+    --primary: 28 44% 25%; /* Darker Brown for primary actions */
+    --primary-foreground: 41 45% 82%; /* Parchment Yellow */
+    --secondary: 41 45% 72%; /* Ochre: #C49E54 */
+    --secondary-foreground: 28 44% 18%;
+    --muted: 33 28% 85%;
+    --muted-foreground: 28 25% 35%;
+    --accent: 42 55% 63%; /* Soft Gold: #D4B46E */
+    --accent-foreground: 28 44% 18%;
+    --destructive: 9 52% 36%; /* Ancient Ink Red: #8B3A2B */
+    --destructive-foreground: 33 28% 93%;
+    --border: 41 45% 65%; /* Ochre-based border */
+    --input: 33 28% 88%;
+    --ring: 42 55% 63%; /* Soft Gold for focus rings */
     --radius: 0.8rem;
   }
  
   .dark {
-    --background: 222 84% 4%; /* Very Dark Blue */
-    --foreground: 210 40% 98%;
-    --card: 222 84% 8%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 84% 8%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 71% 53%; /* Blue (#4A90E2) */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 215 30% 25%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 32% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 210 90% 60%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 217 71% 53%;
+    --background: 26 33% 11%; /* Deep Burnt Brown: #2A1B10 */
+    --foreground: 33 28% 85%; /* Parchment Yellow */
+    --card: 27 30% 15%;
+    --card-foreground: 33 28% 85%;
+    --popover: 27 30% 15%;
+    --popover-foreground: 33 28% 85%;
+    --primary: 41 45% 72%; /* Ochre: #C49E54 */
+    --primary-foreground: 26 33% 11%;
+    --secondary: 28 44% 25%; /* Dark Brown */
+    --secondary-foreground: 33 28% 85%;
+    --muted: 27 30% 20%;
+    --muted-foreground: 33 20% 65%;
+    --accent: 42 55% 63%; /* Soft Gold: #D4B46E */
+    --accent-foreground: 26 33% 11%;
+    --destructive: 9 52% 46%; /* Brighter Ink Red for dark mode */
+    --destructive-foreground: 33 28% 85%;
+    --border: 28 44% 20%;
+    --input: 28 44% 20%;
+    --ring: 42 55% 63%;
   }
 }
  
@@ -59,7 +59,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "liga" 1, "calt" 1;
-    background: linear-gradient(180deg, hsl(217, 71%, 53%), hsl(220, 78%, 45%));
+    background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--background) / 0.8));
   }
 
   /* Custom Scrollbar Styling */
@@ -74,7 +74,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.8);
+    background: hsl(var(--secondary) / 0.8);
     border-radius: 10px;
     border: 3px solid transparent;
     background-clip: content-box;
@@ -87,7 +87,7 @@
   /* For Firefox */
   html {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--primary)) transparent;
+    scrollbar-color: hsl(var(--secondary)) transparent;
   }
 }
 
@@ -102,8 +102,8 @@
      box-shadow: 0 4px 15px -2px hsl(var(--background) / 0.1);
   }
   
-  .burnt-edge-pulse:hover, .burnt-edge-pulse {
-    animation: blue-glow 2s infinite;
+  .burnt-edge-pulse {
+    animation: burnt-edge-glow 3s infinite ease-in-out;
   }
 
   .wax-press:active {
@@ -120,7 +120,7 @@
     inset: 0;
     border-radius: inherit;
     opacity: 0;
-    animation: subtle-glow 5s infinite;
+    animation: torch-flicker-glow 5s infinite;
     pointer-events: none;
   }
 
@@ -140,11 +140,11 @@
   }
 
   .gold-burst {
-    animation: correct-celebration 0.7s ease-out forwards;
+    animation: gold-burst-anim 0.7s ease-out forwards;
   }
 
   .red-ink-splash {
-    animation: incorrect-penalty 0.7s ease-out forwards;
+    animation: red-ink-splash-anim 0.7s ease-out forwards;
   }
 
 }

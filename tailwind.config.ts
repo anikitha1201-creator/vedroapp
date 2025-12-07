@@ -11,8 +11,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ["'Quicksand'", 'sans-serif'],
-        headline: ["'Quicksand'", 'sans-serif'],
+        body: ["'Literata'", 'serif'],
+        headline: ["'Literata'", 'serif'],
         code: ['monospace'],
       },
       colors: {
@@ -119,8 +119,8 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'scroll-unroll': 'scroll-unroll 0.7s cubic-bezier(0.65, 0, 0.35, 1) forwards',
         'ink-fade-in': 'ink-fade-in 1s ease-out forwards',
-        'burnt-edge-pulse': 'burnt-edge-pulse 2s infinite',
-        'torch-flicker': 'torch-flicker 5s infinite',
+        'burnt-edge-pulse': 'burnt-edge-glow 3s infinite ease-in-out',
+        'torch-flicker': 'torch-flicker-glow 5s infinite',
         'bounce-in': 'bounce-in 0.5s ease-out forwards',
       },
     },
