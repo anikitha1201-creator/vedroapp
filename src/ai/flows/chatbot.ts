@@ -9,6 +9,7 @@ import {
   ChatbotOutputSchema,
   type ChatbotInput,
   type ChatbotOutput,
+  LearningPackSchema,
 } from './chatbot.types';
 
 const chatbotPrompt = ai.definePrompt({

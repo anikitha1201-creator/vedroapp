@@ -41,9 +41,10 @@ export const LearningPackSchema = z.object({
   miniQuiz: z
     .array(QuizQuestionSchema)
     .length(5)
-    .describe(
-      'A mini quiz with 5 multiple-choice questions, each with 4 options and a marked correct answer.'
-    ),
+    // TODO: The model is failing to generate this sometimes. Relaxing the constraints.
+    // .describe(
+    //   'A mini quiz with 5 multiple-choice questions, each with 4 options and a marked correct answer.'
+    // ),
 });
 export type LearningPack = z.infer<typeof LearningPackSchema>;
 
