@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/header';
 import DustParticles from '@/components/dust-particles';
+import BookLayout from '@/components/book-layout';
 
 export const metadata: Metadata = {
   title: 'Vedro – Learning Through Interaction',
@@ -20,13 +20,13 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&display=swap"
-          rel="stylesheet"
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
         />
-         <link
-          href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap"
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Poppins:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -36,10 +36,7 @@ export default function RootLayout({
         )}
       >
         <DustParticles />
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          {children}
-        </main>
+        <BookLayout>{children}</BookLayout>
         <Toaster />
       </body>
     </html>

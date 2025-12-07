@@ -1,6 +1,5 @@
 
-
-@import "./animations.css";
+@import './animations.css';
 
 @tailwind base;
 @tailwind components;
@@ -8,59 +7,60 @@
 
 @layer base {
   :root {
-    --background: 33 28% 90%; /* Parchment Light Yellow: #E6D7B8 */
+    --background: 39 44% 81%; /* Parchment Light Yellow: #E6D7B8 */
     --foreground: 28 44% 18%; /* Dark Brown: #5C3A21 */
-    --card: 33 28% 93%; /* Lighter Parchment */
+    --card: 39 44% 84%; /* Lighter Parchment */
     --card-foreground: 28 44% 18%;
-    --popover: 33 28% 93%;
+    --popover: 39 44% 84%;
     --popover-foreground: 28 44% 18%;
     --primary: 28 44% 25%; /* Darker Brown for primary actions */
-    --primary-foreground: 41 45% 82%; /* Parchment Yellow */
-    --secondary: 41 45% 72%; /* Ochre: #C49E54 */
+    --primary-foreground: 39 44% 81%; /* Parchment Yellow */
+    --secondary: 41 45% 55%; /* Ochre: #C49E54 */
     --secondary-foreground: 28 44% 18%;
-    --muted: 33 28% 85%;
+    --muted: 39 44% 76%;
     --muted-foreground: 28 25% 35%;
     --accent: 42 55% 63%; /* Soft Gold: #D4B46E */
     --accent-foreground: 28 44% 18%;
     --destructive: 9 52% 36%; /* Ancient Ink Red: #8B3A2B */
-    --destructive-foreground: 33 28% 93%;
+    --destructive-foreground: 39 44% 81%;
     --border: 41 45% 65%; /* Ochre-based border */
-    --input: 33 28% 88%;
+    --input: 39 44% 88%;
     --ring: 42 55% 63%; /* Soft Gold for focus rings */
-    --radius: 0.8rem;
+    --radius: 0.5rem;
   }
- 
+
   .dark {
-    --background: 26 33% 11%; /* Deep Burnt Brown: #2A1B10 */
-    --foreground: 33 28% 85%; /* Parchment Yellow */
-    --card: 27 30% 15%;
-    --card-foreground: 33 28% 85%;
-    --popover: 27 30% 15%;
-    --popover-foreground: 33 28% 85%;
-    --primary: 41 45% 72%; /* Ochre: #C49E54 */
-    --primary-foreground: 26 33% 11%;
+    --background: 26 48% 11%; /* Deep Burnt Brown: #2A1B10 */
+    --foreground: 39 44% 81%; /* Parchment Yellow */
+    --card: 26 48% 15%;
+    --card-foreground: 39 44% 81%;
+    --popover: 26 48% 15%;
+    --popover-foreground: 39 44% 81%;
+    --primary: 41 45% 55%; /* Ochre: #C49E54 */
+    --primary-foreground: 26 48% 11%;
     --secondary: 28 44% 25%; /* Dark Brown */
-    --secondary-foreground: 33 28% 85%;
-    --muted: 27 30% 20%;
-    --muted-foreground: 33 20% 65%;
+    --secondary-foreground: 39 44% 81%;
+    --muted: 26 48% 20%;
+    --muted-foreground: 39 20% 65%;
     --accent: 42 55% 63%; /* Soft Gold: #D4B46E */
-    --accent-foreground: 26 33% 11%;
+    --accent-foreground: 26 48% 11%;
     --destructive: 9 52% 46%; /* Brighter Ink Red for dark mode */
-    --destructive-foreground: 33 28% 85%;
+    --destructive-foreground: 39 44% 81%;
     --border: 28 44% 20%;
     --input: 28 44% 20%;
     --ring: 42 55% 63%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "liga" 1, "calt" 1;
-    background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--background) / 0.8));
+    font-feature-settings: 'liga' 1, 'calt' 1;
+    background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+    background-color: hsl(var(--background));
   }
 
   /* Custom Scrollbar Styling */
@@ -84,7 +84,6 @@
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--accent));
   }
-
   /* For Firefox */
   html {
     scrollbar-width: thin;
@@ -96,33 +95,17 @@
   .text-ink-fade {
     animation: ink-fade-in 1s ease-out forwards;
   }
-
   .burnt-edge {
-     border-radius: var(--radius);
-     border: 1px solid hsl(var(--border));
-     box-shadow: 0 4px 15px -2px hsl(var(--background) / 0.1);
-  }
-  
-  .burnt-edge-pulse {
-    animation: burnt-edge-glow 3s infinite ease-in-out;
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    box-shadow:
+      0 4px 15px -2px hsl(var(--background) / 0.1),
+      inset 0 0 8px 2px hsl(var(--background));
   }
 
   .wax-press:active {
     transform: scale(0.95) translate(1px, 1px);
     transition: transform 0.1s cubic-bezier(0, 0, 0.2, 1);
-  }
-
-  .torch-flicker {
-    position: relative;
-  }
-  .torch-flicker::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    opacity: 0;
-    animation: torch-flicker-glow 5s infinite;
-    pointer-events: none;
   }
 
   .speed-lines-bg {
@@ -139,21 +122,16 @@
     background-size: 100px 100px;
     animation: speed-lines 1s linear infinite;
   }
-
   .gold-burst {
     animation: gold-burst-anim 0.7s ease-out forwards;
   }
-  
   .green-burst {
     animation: green-burst-anim 0.7s ease-out forwards;
   }
-
   .red-ink-splash {
     animation: red-ink-splash-anim 0.7s ease-out forwards;
   }
-
   .animate-shake {
     animation: shake 0.5s ease-in-out;
   }
-
 }

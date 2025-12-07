@@ -12,44 +12,14 @@
   }
 }
 
-/* Burnt-Edge Pulse Glow Animation */
-@keyframes burnt-edge-glow {
-  0% {
-    box-shadow: 
-      0 0 5px 2px hsla(var(--accent) / 0.4),
-      0 0 3px 1px hsl(var(--border));
-  }
-  50% {
-    box-shadow: 
-      0 0 15px 5px hsla(var(--accent) / 0.7),
-      0 0 5px 2px hsl(var(--border));
-  }
-  100% {
-    box-shadow: 
-      0 0 5px 2px hsla(var(--accent) / 0.4),
-      0 0 3px 1px hsl(var(--border));
-  }
-}
-
-/* Torch Flicker Glow Animation */
-@keyframes torch-flicker-glow {
-  0%, 100% {
-    opacity: 0.08;
-    box-shadow: 0 0 20px 10px hsla(var(--accent) / 0.05);
-  }
-  50% {
-    opacity: 0.15;
-    box-shadow: 0 0 25px 12px hsla(var(--accent) / 0.1);
-  }
-}
-
 /* Dust Particle Drift Animation */
 @keyframes dust-particles-drift {
   0% {
     transform: translate(0, 0);
     opacity: 0;
   }
-  10%, 90% {
+  10%,
+  90% {
     opacity: 1;
   }
   100% {
@@ -99,23 +69,38 @@
 
 /* Red Ink Splash - Incorrect Answer Penalty Animation */
 @keyframes red-ink-splash-anim {
-  0% { transform: translateX(0); }
-  10% { transform: translateX(-5px) rotate(-2deg); }
-  20% { transform: translateX(5px) rotate(2deg); }
-  30% { transform: translateX(-5px) rotate(-2deg); }
-  40% { transform: translateX(5px) rotate(2deg); }
-  50% { transform: translateX(0); box-shadow: 0 0 20px 5px hsla(var(--destructive)/0.5); }
-  100% { box-shadow: 0 0 0 0 hsla(var(--destructive)/0); }
+  0% {
+    transform: translateX(0);
+  }
+  10% {
+    transform: translateX(-5px) rotate(-2deg);
+  }
+  20% {
+    transform: translateX(5px) rotate(2deg);
+  }
+  30% {
+    transform: translateX(-5px) rotate(-2deg);
+  }
+  40% {
+    transform: translateX(5px) rotate(2deg);
+  }
+  50% {
+    transform: translateX(0);
+    box-shadow: 0 0 20px 5px hsla(var(--destructive) / 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsla(var(--destructive) / 0);
+  }
 }
 
 /* Speed Lines Animation */
 @keyframes speed-lines {
-    0% {
-        background-position: 0 0;
-    }
-    100% {
-        background-position: -2000px 0;
-    }
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -2000px 0;
+  }
 }
 
 /* Bounce-in animation for modals/cards */
@@ -135,20 +120,22 @@
 
 /* Shake animation for incorrect answer */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-/* Page Turn Animation */
-@keyframes book-open {
-  from {
-    opacity: 0;
-    transform: perspective(1000px) rotateY(-25deg) scale(0.9);
+  0%,
+  100% {
+    transform: translateX(0);
   }
-  to {
-    opacity: 1;
-    transform: perspective(1000px) rotateY(0deg) scale(1);
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
   }
 }
 
@@ -164,7 +151,8 @@
 
 /* Catch animation */
 @keyframes catch-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 15px 5px hsla(var(--accent) / 0);
   }
   50% {
@@ -182,28 +170,15 @@
   }
 }
 
-/* Book opening sequence animations */
-@keyframes book-cover {
+/* Page Turn Animation */
+@keyframes page-turn {
   0% {
-    transform: perspective(1200px) rotateY(0deg) scale(0.9);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transform: rotateY(90deg);
   }
   50% {
-    transform: perspective(1200px) rotateY(-180deg) scale(1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: rotateY(30deg);
   }
   100% {
-    transform: perspective(1200px) rotateY(-180deg) scale(1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-}
-@keyframes page-open {
-  from {
-    transform: perspective(1200px) rotateY(0deg);
-    opacity: 0.5;
-  }
-  to {
-    transform: perspective(1200px) rotateY(-180deg);
-    opacity: 1;
+    transform: rotateY(0deg);
   }
 }
