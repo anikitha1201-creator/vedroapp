@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, type FormEvent } from 'react';
+import { useState, useRef, useEffect, type FormEvent, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { generateChatbotResponse } from '../actions';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,28 @@ export type Message = {
   role: 'user' | 'model';
   content: any; // Can be string or a structured object
 };
+
+// --- START: Debounce and Cache Utilities ---
+
+// Simple in-memory cache
+const responseCache = new Map<string, any>();
+
+// Debounce function to delay execution
+const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
+  let timeout: NodeJS.Timeout | null = null;
+
+  const debounced = (...args: Parameters<F>) => {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
+
+  return debounced as (...args: Parameters<F>) => void;
+};
+
+// --- END: Debounce and Cache Utilities ---
+
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -36,25 +58,25 @@ export default function ChatInterface() {
     }
   }, [messages]);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = { role: 'user', content: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-
-    const history = messages.map(msg => ({ 
-      role: msg.role, 
-      content: typeof msg.content === 'string' ? msg.content : "Previous structured response" 
+  const fetchChatbotResponse = async (userInput: string) => {
+     if (responseCache.has(userInput)) {
+      const cachedResponse = responseCache.get(userInput);
+      const aiMessage: Message = { role: 'model', content: cachedResponse.response };
+      setMessages((prev) => [...prev, aiMessage]);
+      setIsLoading(false);
+      return;
+    }
+    
+    const history = messages.map(msg => ({
+      role: msg.role,
+      content: typeof msg.content === 'string' ? msg.content : 'Previous structured response',
     }));
 
-    const result = await generateChatbotResponse({ history, prompt: input });
+    const result = await generateChatbotResponse({ history, prompt: userInput });
 
     if (result.success && result.response) {
-      // The response from the new flow is an object with a 'response' property which is a string.
       const aiMessage: Message = { role: 'model', content: result.response.response };
+      responseCache.set(userInput, result.response); // Cache the successful response
       setMessages((prev) => [...prev, aiMessage]);
     } else {
       toast({
@@ -62,10 +84,25 @@ export default function ChatInterface() {
         description: result.error,
         variant: 'destructive',
       });
-       // If the API call fails, remove the user's message to allow them to try again.
-       setMessages(prev => prev.slice(0, prev.length - 1));
+      // If the API call fails, remove the user's message to allow them to try again.
+      setMessages(prev => prev.slice(0, prev.length - 1));
     }
     setIsLoading(false);
+  }
+
+  const debouncedFetch = useCallback(debounce(fetchChatbotResponse, 500), [messages]);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
+    setInput('');
+    setIsLoading(true);
+
+    debouncedFetch(currentInput);
   };
 
   return (
