@@ -5,6 +5,7 @@ import { z } from 'genkit';
 
 export const ChatbotInputSchema = z.object({
   message: z.string().describe("The user's message to the chatbot."),
+  fileDataUri: z.string().optional().describe("A file provided by the user as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type ChatbotInput = z.infer<typeof ChatbotInputSchema>;
 

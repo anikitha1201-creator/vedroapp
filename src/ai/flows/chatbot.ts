@@ -21,7 +21,12 @@ const chatbotPrompt = ai.definePrompt({
       You MUST return one structured 'LearningPack' in the exact JSON format defined by the output schema.
 
       The topic to explain is:
-      {{{message}}}
+      "{{{message}}}"
+      
+      {{#if fileDataUri}}
+      Use the following document as the primary context for your explanation:
+      {{media url=fileDataUri}}
+      {{/if}}
 
       All explanations must follow these rules:
       - Be accurate and student-friendly.

@@ -1,22 +1,30 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { safeGenerateContent } from '../actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Bot, ChevronRight, Loader2, Send, User, Check, X } from 'lucide-react';
+import { Bot, ChevronRight, Loader2, Send, User, Check, X, Paperclip, FileText, Trash2, Plus, Eraser } from 'lucide-react';
 import type { LearningPack, QuizQuestionSchema } from '@/ai/flows/chatbot.types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { z } from 'zod';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string | LearningPack;
+  fileName?: string;
+};
+
+type AttachedFile = {
+    name: string;
+    dataUri: string;
 };
 
 // --- Sub Components ---
@@ -115,14 +123,33 @@ const AssistantMessage = ({ content }: { content: LearningPack | string }) => {
     return <LearningPackDisplay pack={content} />;
 };
 
+const UserMessageContent = ({ message }: { message: Message }) => {
+    return (
+        <div className="space-y-2">
+            <p>{message.content as string}</p>
+            {message.fileName && (
+                <Badge variant="secondary" className="flex gap-2 items-center w-fit">
+                    <FileText className="w-3 h-3"/>
+                    <span>{message.fileName}</span>
+                </Badge>
+            )}
+        </div>
+    )
+}
+
 // --- Main Component ---
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -135,19 +162,24 @@ export default function ChatInterface() {
   }, []);
 
   const handleSendMessage = async (messageContent: string) => {
-    if (!messageContent.trim() || isLoading) return;
+    if ((!messageContent.trim() && !attachedFile) || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: messageContent,
+      fileName: attachedFile?.name,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
     setInputValue('');
 
-    const result = await safeGenerateContent({ message: messageContent });
+    const result = await safeGenerateContent({ 
+        message: messageContent,
+        fileDataUri: attachedFile?.dataUri,
+    });
+    setAttachedFile(null); // Clear file after sending
 
     const botMessage: Message = {
       id: (Date.now() + 1).toString(),
@@ -164,8 +196,57 @@ export default function ChatInterface() {
     handleSendMessage(inputValue);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast({
+            title: 'File Too Large',
+            description: 'Please upload files smaller than 2MB.',
+            variant: 'destructive',
+        });
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        setAttachedFile({ name: file.name, dataUri });
+    };
+    reader.onerror = () => {
+        toast({
+            title: 'Error Reading File',
+            description: 'There was an issue processing your file.',
+            variant: 'destructive',
+        });
+    }
+    reader.readAsDataURL(file);
+    e.target.value = ''; // Reset file input
+  };
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setAttachedFile(null);
+  }
+
+  const handleClearChat = () => {
+    setMessages(prev => prev.slice(0, 1));
+  }
+
   return (
     <div className="flex flex-col h-[75vh] max-w-4xl mx-auto bg-card rounded-lg burnt-edge">
+       <div className="flex items-center justify-between p-2 border-b">
+         <div className="p-2 text-primary font-headline">Vedro AI</div>
+         <div className="flex items-center gap-2">
+             <Button variant="ghost" size="icon" onClick={handleNewChat} aria-label="New Chat">
+                 <Plus />
+             </Button>
+             <Button variant="ghost" size="icon" onClick={handleClearChat} aria-label="Clear Chat">
+                 <Eraser />
+             </Button>
+         </div>
+       </div>
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-6">
           {messages.length === 0 && (
@@ -176,7 +257,7 @@ export default function ChatInterface() {
                 <div>
                   <p className="font-semibold text-primary">Vedro AI</p>
                   <div className="prose-sm max-w-none text-foreground">
-                    <p>Hello! Ask me about a concept you'd like to learn, like 'Photosynthesis' or 'Newton's Laws'.</p>
+                    <p>Hello! Ask me about a concept you'd like to learn, like 'Photosynthesis' or 'Newton's Laws'. You can also attach a file for context.</p>
                   </div>
                 </div>
             </div>
@@ -207,7 +288,7 @@ export default function ChatInterface() {
                     className="prose prose-sm dark:prose-invert max-w-none"
                 >
                   {message.role === 'user' ? (
-                      <p>{message.content as string}</p>
+                      <UserMessageContent message={message} />
                   ) : (
                       <AssistantMessage content={message.content} />
                   )}
@@ -235,17 +316,45 @@ export default function ChatInterface() {
           )}
         </div>
       </ScrollArea>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-2">
+        {attachedFile && (
+            <div className="flex items-center justify-between">
+                <Badge variant="outline" className="flex items-center gap-2">
+                    <FileText className="w-4 h-4"/>
+                    <span className="font-normal">{attachedFile.name}</span>
+                </Badge>
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => setAttachedFile(null)}>
+                    <Trash2 className="w-4 h-4" />
+                </Button>
+            </div>
+        )}
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden"
+                accept="image/*,text/plain,application/pdf"
+            />
+             <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading || !!attachedFile}
+            >
+                <Paperclip />
+                <span className="sr-only">Attach file</span>
+            </Button>
           <Input
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask about a concept..."
+            placeholder={attachedFile ? "Ask a question about the file..." : "Ask about a concept..."}
             className="flex-1"
             disabled={isLoading}
           />
-          <Button type="submit" disabled={isLoading || !inputValue.trim()} className="wax-press">
+          <Button type="submit" disabled={isLoading || (!inputValue.trim() && !attachedFile)} className="wax-press">
             {isLoading ? <Loader2 className="animate-spin" /> : <Send />}
             <span className="sr-only">Send</span>
           </Button>
