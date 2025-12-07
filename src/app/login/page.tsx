@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,11 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth, useUser } from '@/firebase';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { LogIn } from 'lucide-react';
+import {
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 const GoogleIcon = () => (
   <svg className="h-5 w-5" viewBox="0 0 48 48">
@@ -38,25 +45,49 @@ const GoogleIcon = () => (
 export default function LoginPage() {
   const router = useRouter();
   const auth = useAuth();
-  const { user, isLoading } = useUser();
+  const { user, isUserLoading } = useUser();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (!isUserLoading && user) {
       router.push('/');
     }
-  }, [user, router]);
+  }, [user, isUserLoading, router]);
 
-  const handleLogin = async () => {
+  const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
+    setIsLoading(true);
+    setError(null);
     try {
       await signInWithPopup(auth, provider);
       router.push('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error signing in with Google', error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (isLoading || user) {
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/');
+    } catch (error: any) {
+      console.error('Error signing in with email', error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p>Loading...</p>
@@ -78,19 +109,61 @@ export default function LoginPage() {
             Unlock the scrolls of knowledge.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button onClick={handleLogin} className="w-full wax-press">
+        <CardContent className="space-y-4">
+          <form onSubmit={handleEmailLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="scholar@ancient-academy.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
+            <Button type="submit" className="w-full wax-press" disabled={isLoading}>
+              Sign In
+            </Button>
+          </form>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+          <Button onClick={handleGoogleLogin} variant="outline" className="w-full wax-press" disabled={isLoading}>
             <GoogleIcon /> Summon with Google
           </Button>
         </CardContent>
-        <CardFooter className="flex-col gap-4 text-ink-fade" style={{ animationDelay: '0.6s' }}>
-          <p className="text-center text-xs text-muted-foreground mt-2">
-            Sign in to access the full library of interactive lessons and games.
+        <CardFooter className="flex-col gap-2 text-sm" style={{ animationDelay: '0.6s' }}>
+          <p className="text-muted-foreground">
+            Don't have an account?{' '}
+            <Link href="/signup" className="underline text-primary hover:text-accent">
+              Sign Up
+            </Link>
           </p>
         </CardFooter>
       </Card>
     </div>
   );
 }
-
-    

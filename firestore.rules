@@ -1,3 +1,4 @@
+
 /**
  * Core Philosophy:
  * This ruleset enforces a strict user-ownership model for all private user data,
@@ -167,9 +168,7 @@ service cloud.firestore {
      */
     match /topics/{topicId} {
       allow get, list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow write: if false;
 
       /**
        * @description Publicly readable collection of steps within a topic.
@@ -180,9 +179,7 @@ service cloud.firestore {
        */
       match /steps/{stepId} {
         allow get, list: if true;
-        allow create: if false;
-        allow update: if false;
-        allow delete: if false;
+        allow write: if false;
       }
     }
 
@@ -195,9 +192,7 @@ service cloud.firestore {
      */
     match /quizQuestions/{questionId} {
       allow get, list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow write: if false;
     }
 
     /**
@@ -209,9 +204,7 @@ service cloud.firestore {
      */
     match /badges/{badgeId} {
       allow get, list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow write: if false;
     }
   }
 }

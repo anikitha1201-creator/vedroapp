@@ -43,7 +43,7 @@ export default function BookLayout({ children }: { children: ReactNode }) {
   const isDashboard = pathname === '/';
   
   useEffect(() => {
-    if (!isUserLoading && !user && pathname !== '/login') {
+    if (!isUserLoading && !user && pathname !== '/login' && pathname !== '/signup') {
       router.push('/login');
     }
   }, [isUserLoading, user, pathname, router]);
@@ -128,7 +128,7 @@ export default function BookLayout({ children }: { children: ReactNode }) {
                     </Avatar>
                     <div>
                       <p className="font-semibold text-sm leading-none">
-                        {user.displayName}
+                        {user.displayName || 'Scholar'}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {user.email}
@@ -202,5 +202,3 @@ export default function BookLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-    
