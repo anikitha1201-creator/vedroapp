@@ -1,4 +1,4 @@
-import PageWrapper from '@/components/page-wrapper';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +25,7 @@ const gameHistory = [
 
 export default function ProfilePage() {
   return (
-    <PageWrapper>
+    <>
       <h1 className="text-4xl font-bold font-headline text-primary mb-8 text-center text-ink-fade">
         Your Scholar Profile
       </h1>
@@ -122,6 +122,6 @@ export default function ProfilePage() {
             </Tabs>
         </div>
       </div>
-    </PageWrapper>
+    </>
   );
 }

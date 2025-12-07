@@ -1,9 +1,9 @@
-import PageWrapper from '@/components/page-wrapper';
+
 import ExperimentClientPage from './components/experiment-client-page';
 
 export default function SandboxExperimentPage() {
   return (
-    <PageWrapper>
+    <>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold font-headline text-primary mb-2 text-ink-fade">
           The Alchemist's Sandbox
@@ -13,6 +13,6 @@ export default function SandboxExperimentPage() {
         </p>
       </div>
       <ExperimentClientPage />
-    </PageWrapper>
+    </>
   );
 }

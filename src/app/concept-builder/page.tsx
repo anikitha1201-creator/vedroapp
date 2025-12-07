@@ -1,9 +1,9 @@
-import PageWrapper from '@/components/page-wrapper';
+
 import ConceptBuilderClient from './components/concept-builder-client';
 
 export default function ConceptBuilderPage() {
   return (
-    <PageWrapper>
+    <>
       <h1 className="text-4xl font-bold font-headline text-primary mb-2 text-center text-ink-fade">
         Concept Builder
       </h1>
@@ -11,6 +11,6 @@ export default function ConceptBuilderPage() {
         Assemble the puzzle of knowledge, piece by piece.
       </p>
       <ConceptBuilderClient />
-    </PageWrapper>
+    </>
   );
 }

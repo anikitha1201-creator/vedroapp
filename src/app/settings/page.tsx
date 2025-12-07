@@ -1,4 +1,4 @@
-import PageWrapper from '@/components/page-wrapper';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +19,7 @@ import { Bell, Shield, Trash2 } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
-    <PageWrapper>
+    <>
       <h1 className="text-4xl font-bold font-headline text-primary mb-8 text-center text-ink-fade">
         Settings
       </h1>
@@ -97,6 +97,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </PageWrapper>
+    </>
   );
 }
