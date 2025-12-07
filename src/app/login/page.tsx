@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { BookOpen, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 const GoogleIcon = () => (
   <svg className="h-5 w-5" viewBox="0 0 48 48">
@@ -37,11 +38,15 @@ const GoogleIcon = () => (
 
 export default function LoginPage() {
   const router = useRouter();
+  const [animationState, setAnimationState] = useState('closed');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimationState('opening'), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd handle authentication here.
-    // For this demo, we'll just navigate to the dashboard.
     router.push('/');
   };
 
@@ -50,55 +55,67 @@ export default function LoginPage() {
       <div className="absolute inset-0 z-0">
           <span className="fixed block w-full h-full bg-[url('https://www.transparenttextures.com/patterns/old-paper.png')] opacity-20"></span>
       </div>
-      <Card className="w-full max-w-md z-10 animate-[ink-fade-in_1s_ease-out_forwards] burnt-edge-pulse">
-        <CardHeader className="text-center">
-          <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full mb-2">
-            <BookOpen size={32} />
-          </div>
-          <CardTitle className="text-3xl font-headline">Welcome Back, Scholar</CardTitle>
-          <CardDescription>Unlock the scrolls of knowledge.</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Scroll of Identity (Email)</Label>
-              <Input id="email" type="email" placeholder="scholar@ancient-academy.edu" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Secret Word (Password)</Label>
-              <Input id="password" type="password" required />
-            </div>
-            <div className="flex items-center justify-between">
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary underline">
-                Forgot your secret word?
-              </Link>
-            </div>
-          </CardContent>
-          <CardFooter className="flex-col gap-4">
-            <Button type="submit" className="w-full wax-press">
-              <LogIn />
-              Enter the Library
-            </Button>
-            <div className="relative w-full">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+
+      <div 
+        className="relative w-full max-w-md h-[550px] transition-transform duration-1000"
+        style={{ transformStyle: 'preserve-3d', transform: animationState === 'opening' ? 'translateX(50%)' : '' }}
+      >
+        {/* Book Cover */}
+        <div 
+          className="absolute w-full h-full bg-primary rounded-lg flex flex-col items-center justify-center p-6 transition-transform duration-1000 origin-left border-r-4 border-secondary"
+          style={{
+            transformStyle: 'preserve-3d',
+            transform: animationState === 'opening' ? 'rotateY(-180deg)' : 'rotateY(0deg)',
+            backfaceVisibility: 'hidden',
+          }}
+        >
+          <BookOpen className="text-secondary w-24 h-24 mb-4" />
+          <h1 className="text-5xl font-headline text-primary-foreground" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>Vedro</h1>
+        </div>
+
+        {/* First Page (Login Form) */}
+        <Card className="w-full h-full absolute top-0 left-0 transition-opacity duration-500 delay-500" style={{backfaceVisibility: 'hidden', opacity: animationState === 'opening' ? 1 : 0}}>
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-headline text-ink-fade" style={{ animationDelay: '0.8s'}}>Welcome, Scholar</CardTitle>
+            <CardDescription className="text-ink-fade" style={{ animationDelay: '1s'}}>Unlock the scrolls of knowledge.</CardDescription>
+          </CardHeader>
+          <form onSubmit={handleLogin}>
+            <CardContent className="space-y-4 text-ink-fade" style={{ animationDelay: '1.2s'}}>
+              <div className="space-y-2">
+                <Label htmlFor="email">Scroll of Identity (Email)</Label>
+                <Input id="email" type="email" placeholder="scholar@ancient-academy.edu" required />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or summon with</span>
+              <div className="space-y-2">
+                <Label htmlFor="password">Secret Word (Password)</Label>
+                <Input id="password" type="password" required />
               </div>
-            </div>
-            <Button variant="outline" className="w-full wax-press">
-              <GoogleIcon /> Summon with Google
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Not yet a registered Scribe?{' '}
-              <Link href="/signup" className="font-semibold text-primary hover:underline">
-                Join the Academy
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+            </CardContent>
+            <CardFooter className="flex-col gap-4 text-ink-fade" style={{ animationDelay: '1.4s'}}>
+              <Button type="submit" className="w-full wax-press">
+                <LogIn />
+                Enter the Library
+              </Button>
+              <div className="relative w-full mt-2">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Or summon with</span>
+                </div>
+              </div>
+              <Button variant="outline" className="w-full wax-press">
+                <GoogleIcon /> Summon with Google
+              </Button>
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                Not yet a registered Scribe?{' '}
+                <Link href="/signup" className="font-semibold text-primary hover:underline">
+                  Join the Academy
+                </Link>
+              </p>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }

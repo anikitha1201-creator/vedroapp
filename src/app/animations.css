@@ -181,3 +181,29 @@
     width: 0%;
   }
 }
+
+/* Book opening sequence animations */
+@keyframes book-cover {
+  0% {
+    transform: perspective(1200px) rotateY(0deg) scale(0.9);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  50% {
+    transform: perspective(1200px) rotateY(-180deg) scale(1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  100% {
+    transform: perspective(1200px) rotateY(-180deg) scale(1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+}
+@keyframes page-open {
+  from {
+    transform: perspective(1200px) rotateY(0deg);
+    opacity: 0.5;
+  }
+  to {
+    transform: perspective(1200px) rotateY(-180deg);
+    opacity: 1;
+  }
+}
