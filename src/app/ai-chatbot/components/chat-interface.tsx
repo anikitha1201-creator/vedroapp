@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -81,48 +82,69 @@ const LearningPackDisplay = ({ pack }: { pack: LearningPack }) => {
         <h3 className="font-headline text-lg text-primary mb-2">Simple Summary</h3>
         <p className="text-sm">{pack.simpleSummary}</p>
       </div>
-      <div>
-        <h3 className="font-headline text-lg text-primary mb-2">Key Learning Points</h3>
-        <ul className="space-y-2 list-none">
-          {pack.keyLearningPoints.map((point, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <ChevronRight className="w-4 h-4 mt-1 text-accent flex-shrink-0" />
-              <span className="text-sm">{point}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-       <div>
-        <h3 className="font-headline text-lg text-primary mb-2">Step-by-Step Explanation</h3>
-        <ol className="space-y-3">
-          {pack.stepByStepExplanation.map((step, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">{i + 1}</div>
-              <span className="text-sm mt-0.5">{step}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-       <div>
-        <h3 className="font-headline text-lg text-primary mb-2">Cause & Effect</h3>
-        <div className="p-3 rounded-md bg-primary/5 border border-primary/10 text-sm">
-            {pack.causeEffectInfo}
+      
+      {pack.keyLearningPoints && pack.keyLearningPoints.length > 0 && (
+        <div>
+          <h3 className="font-headline text-lg text-primary mb-2">Key Learning Points</h3>
+          <ul className="space-y-2 list-none">
+            {pack.keyLearningPoints.map((point, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <ChevronRight className="w-4 h-4 mt-1 text-accent flex-shrink-0" />
+                <span className="text-sm">{point}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-      <div>
-        <h3 className="font-headline text-lg text-primary mb-2">Mini Quiz</h3>
-        <MiniQuiz quiz={pack.miniQuiz} />
-      </div>
+      )}
+
+      {pack.stepByStepExplanation && pack.stepByStepExplanation.length > 0 && (
+        <div>
+          <h3 className="font-headline text-lg text-primary mb-2">Step-by-Step Explanation</h3>
+          <ol className="space-y-3">
+            {pack.stepByStepExplanation.map((step, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">{i + 1}</div>
+                <span className="text-sm mt-0.5">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+      
+      {pack.causeEffectInfo && (
+        <div>
+          <h3 className="font-headline text-lg text-primary mb-2">Cause & Effect</h3>
+          <div className="p-3 rounded-md bg-primary/5 border border-primary/10 text-sm">
+              {pack.causeEffectInfo}
+          </div>
+        </div>
+      )}
+
+      {pack.miniQuiz && pack.miniQuiz.length > 0 && (
+        <div>
+          <h3 className="font-headline text-lg text-primary mb-2">Mini Quiz</h3>
+          <MiniQuiz quiz={pack.miniQuiz} />
+        </div>
+      )}
     </div>
   )
 };
 
 const AssistantMessage = ({ content }: { content: ChatbotOutput | string }) => {
+    // Handle raw error strings
     if (typeof content === 'string') {
         return <p>{content}</p>;
     }
     
-    // The content is always a LearningPack now
+    // Check if this is a "greeting" response
+    // A greeting has an empty keyLearningPoints array
+    const isGreeting = !content.keyLearningPoints || content.keyLearningPoints.length === 0;
+
+    if (isGreeting) {
+      return <p>{content.simpleSummary}</p>;
+    }
+    
+    // Otherwise, render the full learning pack
     return <LearningPackDisplay pack={content} />;
 };
 
@@ -366,3 +388,5 @@ export default function ChatInterface() {
     </div>
   );
 }
+
+    
