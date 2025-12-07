@@ -1,5 +1,10 @@
 
-import ExperimentClientPage from './components/experiment-client-page';
+import dynamic from 'next/dynamic';
+
+const ExperimentClientPage = dynamic(
+  () => import('./components/experiment-client-page'),
+  { ssr: false }
+);
 
 export default function SandboxExperimentPage() {
   return (
