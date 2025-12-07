@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { generateExperimentExplanation } from '../actions';
+// import { generateExperimentExplanation } from '../actions';
 import { Button } from '@/components/ui/button';
 import { BookCopy, Loader2, Sparkles, RefreshCw, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -130,7 +130,7 @@ const ReactionDisplay = ({ items, reaction }: { items: Item[], reaction: {equati
 
 export default function ExperimentClientPage() {
   const [beakerContents, setBeakerContents] = useState<Item[]>([]);
-  const [explanation, setExplanation] = useState('');
+  // const [explanation, setExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [reaction, setReaction] = useState<{ reactants: string[]; result: string, equation: string, animation: string } | null>(null);
   const { toast } = useToast();
@@ -179,28 +179,28 @@ export default function ExperimentClientPage() {
         return;
     }
 
-    setIsLoading(true);
-    setExplanation('');
+    // setIsLoading(true);
+    // setExplanation('');
 
-    const experimentDescription = `A student has combined ${beakerContents.map(i => i.name).join(', ')}. The reaction is: ${foundReaction.equation}. The result is: ${foundReaction.result}.`;
+    // const experimentDescription = `A student has combined ${beakerContents.map(i => i.name).join(', ')}. The reaction is: ${foundReaction.equation}. The result is: ${foundReaction.result}.`;
 
-    const result = await generateExperimentExplanation(experimentDescription);
+    // const result = await generateExperimentExplanation(experimentDescription);
 
-    if (result.success) {
-      setExplanation(result.explanation);
-    } else {
-      toast({
-        title: 'The Alchemist is puzzled.',
-        description: result.error,
-        variant: 'destructive',
-      });
-    }
-    setIsLoading(false);
+    // if (result.success) {
+    //   setExplanation(result.explanation);
+    // } else {
+    //   toast({
+    //     title: 'The Alchemist is puzzled.',
+    //     description: result.error,
+    //     variant: 'destructive',
+    //   });
+    // }
+    // setIsLoading(false);
   };
 
   const handleReset = () => {
     setBeakerContents([]);
-    setExplanation('');
+    // setExplanation('');
     setReaction(null);
     setIsLoading(false);
   };
@@ -229,7 +229,7 @@ export default function ExperimentClientPage() {
             </Button>
           </div>
 
-          {(isLoading || explanation) && (
+          {/* {(isLoading || explanation) && (
             <Card className="min-h-[150px] torch-flicker">
                 <CardHeader>
                       <CardTitle className="font-headline text-lg flex items-center gap-2 text-primary">
@@ -250,7 +250,7 @@ export default function ExperimentClientPage() {
                 )}
                 </CardContent>
             </Card>
-          )}
+          )} */}
         </div>
       </div>
     </DndProvider>
