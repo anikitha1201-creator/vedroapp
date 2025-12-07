@@ -131,20 +131,9 @@ const LearningPackDisplay = ({ pack }: { pack: LearningPack }) => {
 };
 
 const AssistantMessage = ({ content }: { content: ChatbotOutput | string }) => {
-    // Handle raw error strings
     if (typeof content === 'string') {
         return <p>{content}</p>;
     }
-    
-    // A greeting response is identified by having an empty `keyLearningPoints` array.
-    const isGreeting = !content.keyLearningPoints || content.keyLearningPoints.length === 0;
-
-    if (isGreeting) {
-      // If it's a greeting, only render the simple summary text.
-      return <p>{content.simpleSummary}</p>;
-    }
-    
-    // Otherwise, render the full, structured learning pack.
     return <LearningPackDisplay pack={content} />;
 };
 

@@ -23,15 +23,11 @@ const chatbotPrompt = ai.definePrompt({
       You MUST return the response in the exact JSON format defined by the output schema.
 
       --- RESPONSE RULES ---
-      1.  **GREETING HANDLING**: If the user's message is a short, simple greeting (like "hi", "hello", "hey", "good morning"), your primary goal is to be friendly. In this case, you MUST populate ONLY the 'simpleSummary' field with a warm greeting (e.g., "Hi! What would you like to learn about today?"). ALL OTHER FIELDS in the Learning Pack (keyLearningPoints, stepByStepExplanation, causeEffectInfo, miniQuiz) MUST be EMPTY arrays or strings.
+      1.  **NO MARKDOWN**: You MUST NOT use any Markdown formatting. This includes **bold**, *italics*, lists with '*', or '#'. All text should be plain.
 
-      2.  **NO MARKDOWN**: You MUST NOT use any Markdown formatting. This includes **bold**, *italics*, lists with '*', or '#'. All text should be plain.
-
-      3.  **STEP-BY-STEP FORMAT**: For the 'stepByStepExplanation', format each step as a single string starting with a number, like "1. Title: Explanation text..."
-
-      4.  **ACCURACY**: Be accurate and student-friendly.
+      2.  **ACCURACY**: Be accurate and student-friendly.
       
-      5.  **TONE**: Keep your tone helpful, clear, and supportive. Focus on helping the student understand.
+      3.  **TONE**: Keep your tone helpful, clear, and supportive. Focus on helping the student understand.
       ---
 
       The topic to explain is:
