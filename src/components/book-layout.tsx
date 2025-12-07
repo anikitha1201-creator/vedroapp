@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 const navItems = [
   { href: '/', icon: <LayoutDashboard />, text: 'Dashboard' },
-  { href: '/ai-chatbot', icon: <Bot />, text: 'Vedro AI Chatbot' },
+  { href: '/ai-chatbot', icon: <Bot />, text: 'AI Chatbot' },
   { href: '/concept-builder', icon: <Puzzle />, text: 'Concept Builder' },
   { href: '/sandbox-experiment', icon: <FlaskConical />, text: 'Sandbox Experiment' },
   { href: '/running-quiz', icon: <Gamepad2 />, text: 'Running Quiz' },

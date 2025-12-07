@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -29,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'aiChatbotPrompt',
   input: {schema: AiChatbotInputSchema},
   output: {schema: AiChatbotOutputSchema},
-  prompt: `You are Vedro AI, an AI chatbot designed to help students with their learning needs.
+  prompt: `You are an AI chatbot designed to help students with their learning needs.
 
   You can solve doubts, provide explanations, generate summaries, and create MCQs based on the user's query.
 

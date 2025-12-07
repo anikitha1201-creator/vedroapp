@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 const dashboardItems = [
   {
-    title: 'Vedro AI Chatbot',
+    title: 'AI Chatbot',
     href: '/ai-chatbot',
     icon: <Bot />,
   },
