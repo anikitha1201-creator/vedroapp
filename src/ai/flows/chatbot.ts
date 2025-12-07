@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Vedro AI Chatbot Flow
@@ -105,10 +104,7 @@ const chatbotFlow = ai.defineFlow(
     outputSchema: ChatbotOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt({
-        input,
-        model: chatbotModel,
-    });
+    const { output } = await prompt(input, { model: chatbotModel });
     if (!output) {
       return {
         response:
