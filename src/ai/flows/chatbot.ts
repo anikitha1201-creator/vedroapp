@@ -8,7 +8,6 @@ import {
   ChatbotInputSchema,
   LearningPackSchema,
   type ChatbotInput,
-  type ChatbotOutput,
   type LearningPack,
 } from './chatbot.types';
 
@@ -67,7 +66,7 @@ export const chatbotFlow = ai.defineFlow(
  * and returns a structured learning pack.
  *
  * @param {ChatbotInput} input - The user's topic/message.
- * @returns {Promise<ChatbotOutput>} The structured learning pack.
+ * @returns {Promise<LearningPack>} The structured learning pack.
  */
 export async function getChatbotResponse(
   input: ChatbotInput
