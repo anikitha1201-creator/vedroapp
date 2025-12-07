@@ -71,7 +71,7 @@ Keep your tone encouraging, wise, and slightly magical. The goal is to make lear
       model: 'gemini-1.5-flash',
       prompt: prompt,
     });
-    return text();
+    return text;
   }
 );
 
