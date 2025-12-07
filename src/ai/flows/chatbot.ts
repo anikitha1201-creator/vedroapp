@@ -1,66 +1,16 @@
 'use server';
 /**
  * @fileOverview The main AI-powered chatbot flow for Vedro.
- * This file defines the data structures (schemas), the AI prompt, and the
- * Genkit flow that powers the educational chatbot.
+ * This file defines the AI prompt and the Genkit flow that powers the
+ * educational chatbot. The data schemas are imported from a separate file
+ * to comply with Next.js 'use server' module constraints.
  *
  * - chat - The primary function that processes a user's message.
- * - LearningPack - The output type containing the educational content.
- * - LearningPackSchema - The Zod schema defining the structure of the AI's output.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-/**
- * Defines the Zod schema for a single quiz question.
- * The descriptions guide the AI on what content to generate for each field.
- */
-const QuizQuestionSchema = z.object({
-  question: z.string().describe('A multiple-choice question to test understanding of a key concept.'),
-  options: z.array(z.string()).length(4).describe('Four potential answers to the question (A, B, C, D).'),
-  correctAnswer: z.string().describe('The correct answer from the four options provided.'),
-});
-
-/**
- * Defines the Zod schema for the entire educational learning pack.
- * This structure is what the AI will populate. The descriptions are critical
- * for guiding the language model's output.
- */
-export const LearningPackSchema = z.object({
-  simpleSummary: z
-    .string()
-    .describe(
-      'A brief, easy-to-understand summary of the topic, approximately 3-5 sentences long. If the user only provided a greeting, this should be a friendly response like "Hi! What would you like to learn about today?"'
-    ),
-  keyLearningPoints: z
-    .array(
-      z.object({
-        title: z.string().describe('The concise title of a key concept or fact.'),
-        description: z.string().describe('A brief explanation of the key concept.'),
-      })
-    )
-    .describe('An array of 3 to 5 most important takeaways or facts about the topic. This should be an empty array if the user only provided a greeting.'),
-  stepByStepExplanation: z
-    .array(z.string())
-    .describe(
-      'A sequence of 3 to 6 steps that break down a core process or concept related to the topic. This should be an empty array if the user only provided a greeting.'
-    ),
-  causeAndEffect: z
-    .array(
-      z.object({
-        cause: z.string().describe('A cause related to the topic.'),
-        effect: z.string().describe('The corresponding effect.'),
-      })
-    )
-    .describe('An array of 2 to 4 cause-and-effect relationships. This should be an empty array if the user only provided a greeting.'),
-  quizQuestions: z
-    .array(QuizQuestionSchema)
-    .describe('An array of 3 to 5 multiple-choice questions to test knowledge. This should be an empty array if the user only provided a greeting.'),
-});
-
-// Derives the TypeScript type from the Zod schema.
-export type LearningPack = z.infer<typeof LearningPackSchema>;
+import { LearningPackSchema, type LearningPack } from './schemas';
 
 /**
  * Defines the prompt template that will be sent to the Gemini model.

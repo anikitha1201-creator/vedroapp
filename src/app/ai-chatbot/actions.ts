@@ -1,5 +1,6 @@
 'use server';
-import { chat, type LearningPack } from '@/ai/flows/chatbot';
+import { chat } from '@/ai/flows/chatbot';
+import type { LearningPack } from '@/ai/flows/schemas';
 
 export async function getLearningPack(
   topic: string
