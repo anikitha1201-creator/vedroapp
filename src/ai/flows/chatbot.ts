@@ -6,7 +6,6 @@
 import { ai } from '@/ai/genkit';
 import {
   ChatbotInputSchema,
-  LearningPackSchema,
   ChatbotOutputSchema,
   type ChatbotInput,
   type ChatbotOutput,
