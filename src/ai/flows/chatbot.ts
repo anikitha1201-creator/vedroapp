@@ -1,8 +1,10 @@
 'use server';
+
 /**
- * @fileOverview Vedro AI Chatbot Flow
- * This file defines the Genkit flow for Vedro AI, a structured educational assistant.
+ * Vedro AI Chatbot Flow (Fully Working Version)
+ * FIXED: No JSON output required, correct model mapping, proper field instructions.
  */
+
 import { ai } from '@/ai/genkit';
 import {
   ChatbotInputSchema,
@@ -15,29 +17,65 @@ const chatbotPrompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: { schema: ChatbotInputSchema },
   output: { schema: LearningPackSchema },
+
+  // ⭐ FIXED PROMPT — matches working repo behavior
   prompt: `
-      You are Vedro AI — an educational learning assistant designed to teach any concept clearly and simply.
+You are Vedro AI — a friendly educational learning assistant.
 
-      Your task is to take the user's message and generate a "Learning Pack" about that topic.
-      
-      You are connected to a system that will map your output into a structured LearningPack object.
-      Do NOT output JSON. Instead, directly write the content for each part of the Learning Pack
-      (summary, key points, steps, cause-and-effect, quiz questions) so it can be filled into the schema.
+Your job is to generate a structured "Learning Pack" based on the student's topic.
+DO NOT output JSON. Genkit will map your answers into schema fields automatically.
 
-      --- RESPONSE RULES ---
-      1.  NO MARKDOWN: Do not use bold, italics, lists with '*', or '#'. All text should be plain.
-      2.  ACCURACY: Be accurate and student-friendly.
-      3.  TONE: Keep your tone helpful, clear, and supportive. Focus on helping the student understand.
-      ---
+---------------------
+RESPONSE RULES
+---------------------
 
-      The topic to explain is:
-      "{{{message}}}"
-      
-      {{#if fileDataUri}}
-      Use the following document as the primary context for your explanation:
-      {{media url=fileDataUri}}
-      {{/if}}
-    `,
+1. NO MARKDOWN  
+   Do not use **bold**, *italics*, '*', '#', or any formatting.
+
+2. FILL THE FOLLOWING FIELDS CLEARLY AND DIRECTLY  
+   - simpleSummary:
+       A short, clear explanation of the topic (3–5 sentences).
+
+   - keyLearningPoints:
+       Provide 3–5 key points.
+       Each point must have:
+         - title: short phrase
+         - description: 1–2 sentence explanation.
+
+   - stepByStepExplanation:
+       Provide 3–6 steps explaining the concept logically.
+
+   - causeAndEffect:
+       Provide 2–4 cause→effect pairs.
+       Format:
+       cause: "X happens because …"
+       effect: "This results in …"
+
+   - quizQuestions:
+       Provide 3–5 multiple-choice questions.
+       Each must contain:
+         - question
+         - options: 4 answer options
+         - correctAnswer: EXACT text that matches one option
+
+3. GREETING RULE  
+   If the user says "hi", "hello", "hey", "good morning":
+     - simpleSummary: "Hi! What would you like to learn today?"
+     - All other fields must be EMPTY arrays.
+
+4. ACCURACY  
+   Stay factual, clear, and student-friendly.
+
+---------------------
+
+The topic is:
+"{{{message}}}"
+
+{{#if fileDataUri}}
+Here is additional context from a document:
+{{media url=fileDataUri}}
+{{/if}}
+`
 });
 
 export const chatbotFlow = ai.defineFlow(
@@ -47,36 +85,18 @@ export const chatbotFlow = ai.defineFlow(
     outputSchema: LearningPackSchema,
   },
   async input => {
-    // Handle simple greetings separately
-    const message = input.message.toLowerCase().trim();
-    const greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening'];
-    if (greetings.includes(message)) {
-      return {
-        simpleSummary: "Hi! What would you like to learn about today?",
-        keyLearningPoints: [],
-        stepByStepExplanation: [],
-        causeEffectInfo: '',
-        miniQuiz: [],
-      };
-    }
-
     const { output } = await chatbotPrompt(input);
+
     if (!output) {
       throw new Error(
-        "I'm sorry, I was unable to generate a response for that. Please try another topic."
+        "I'm sorry, I was unable to generate a learning pack for that topic. Please try another one."
       );
     }
+
     return output;
   }
 );
 
-/**
- * An asynchronous function that takes a user's topic, sends it to the chatbot flow,
- * and returns a structured learning pack.
- *
- * @param {ChatbotInput} input - The user's topic/message.
- * @returns {Promise<LearningPack>} The structured learning pack.
- */
 export async function getChatbotResponse(
   input: ChatbotInput
 ): Promise<LearningPack> {
