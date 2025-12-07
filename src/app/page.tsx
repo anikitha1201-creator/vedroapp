@@ -1,7 +1,7 @@
 import DashboardCard from '@/components/dashboard-card';
 import PageWrapper from '@/components/page-wrapper';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Bot, FlaskConical, Gamepad2, Puzzle, Settings, User } from 'lucide-react';
+import { Bot, FlaskConical, Gamepad2, Puzzle, Settings, User, BookOpen } from 'lucide-react';
 
 const dashboardItems = [
   {
@@ -31,6 +31,13 @@ const dashboardItems = [
     href: '/running-quiz',
     icon: <Gamepad2 />,
     image: PlaceHolderImages.find((img) => img.id === 'running-quiz'),
+  },
+  {
+    title: 'Ancient Book Demo',
+    description: 'See the page-turning animation in action.',
+    href: '/book-demo',
+    icon: <BookOpen />,
+    image: PlaceHolderImages.find((img) => img.id === 'book-demo'),
   },
   {
     title: 'Profile',

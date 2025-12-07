@@ -123,3 +123,26 @@
   10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
   20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
+
+/* Page Turn Animation */
+@keyframes turn-page-forward {
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+    transform-origin: left;
+  }
+  100% {
+    transform: perspective(1000px) rotateY(-180deg);
+    transform-origin: left;
+  }
+}
+
+@keyframes turn-page-backward {
+  0% {
+    transform: perspective(1000px) rotateY(-180deg);
+    transform-origin: left;
+  }
+  100% {
+    transform: perspective(1000px) rotateY(0deg);
+    transform-origin: left;
+  }
+}
