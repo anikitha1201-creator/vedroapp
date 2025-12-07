@@ -23,17 +23,6 @@ import {
 export async function getChatbotResponse(
   input: ChatbotInput
 ): Promise<LearningPack> {
-  const result = await chatbotFlow(input);
-  return result;
-}
-
-const chatbotFlow = ai.defineFlow(
-  {
-    name: 'chatbotFlow',
-    inputSchema: ChatbotInputSchema,
-    outputSchema: LearningPackSchema,
-  },
-  async (input) => {
     // This prompt is sent to the Gemini API to generate the structured learning pack.
     // It instructs the AI on its persona, the required output format, and the rules to follow.
     const prompt = `
@@ -75,5 +64,4 @@ const chatbotFlow = ai.defineFlow(
       console.error("Error in chatbotFlow:", error);
       throw new Error("I'm sorry, I was unable to generate a learning pack for that topic. Please try another one.");
     }
-  }
-);
+}

@@ -28,20 +28,6 @@ export type ExperimentExplanationOutput = z.infer<typeof ExperimentExplanationOu
 export async function getExperimentExplanation(
   input: ExperimentExplanationInput
 ): Promise<ExperimentExplanationOutput> {
-  const result = await experimentExplanationFlow(input);
-  // Parse markdown to HTML before sending to client
-  const htmlExplanation = await marked.parse(result.explanation);
-  return { explanation: htmlExplanation };
-}
-
-
-const experimentExplanationFlow = ai.defineFlow(
-  {
-    name: 'experimentExplanationFlow',
-    inputSchema: ExperimentExplanationInputSchema,
-    outputSchema: ExperimentExplanationOutputSchema,
-  },
-  async input => {
     
     const prompt = `You are an expert science teacher with the persona of a wise, ancient alchemist. A student is using an interactive sandbox and has just performed an experiment.
 
@@ -75,10 +61,10 @@ Keep your tone encouraging, wise, and slightly magical. The goal is to make lear
 
     try {
         const text = await runGemini(prompt);
-        return { explanation: text };
+        const htmlExplanation = await marked.parse(text);
+        return { explanation: htmlExplanation };
     } catch (error) {
         console.error("Error in experimentExplanationFlow:", error);
         return {explanation: "### The Alchemist Ponders...\nThe mixture is inert, like a silent stone in a forgotten library. No reaction occurred with these elements. Perhaps try combining different ingredients from the scrolls?"}
     }
-  }
-);
+}
