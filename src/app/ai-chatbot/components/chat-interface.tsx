@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { safeGenerateContentWithRetry } from '../actions';
+import { safeGenerateContent } from '../actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import type { LearningPack, QuizQuestionSchema } from '@/ai/flows/chatbot.types'
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { z } from 'zod';
 
 type Message = {
   id: string;
@@ -139,7 +140,7 @@ export default function ChatInterface() {
     setIsLoading(true);
     setInputValue('');
 
-    const result = await safeGenerateContentWithRetry({ message: messageContent });
+    const result = await safeGenerateContent({ message: messageContent });
 
     const botMessage: Message = {
       id: (Date.now() + 1).toString(),
