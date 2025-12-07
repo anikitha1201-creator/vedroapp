@@ -17,56 +17,59 @@ const chatbotPrompt = ai.definePrompt({
   output: { schema: LearningPackSchema },
 
   prompt: `
-You are Vedro AI, a friendly educational assistant powered by Google Gemini.
-Generate a Learning Pack that matches the output schema. 
-Do NOT output JSON or Markdown. Write plain text only.
+You are Vedro AI, an educational assistant powered by Google Gemini.
+Your job is to fill the LearningPack fields EXACTLY as listed below.
+Do NOT output JSON. Do NOT output markdown. Use plain text only.
+Always return ALL fields unless it is a greeting.
 
-------------------------------
+------------------------------------
 GREETING RULE
-------------------------------
-If the message is a greeting (hi, hello, hey, good morning):
-simpleSummary: "Hi! What would you like to learn today?"
-keyLearningPoints: []
-stepByStepExplanation: []
-causeAndEffect: []
-quizQuestions: []
-Stop after returning this.
+------------------------------------
+If the message is a greeting (hi, hello, hey, good morning, good afternoon):
+simpleSummary: Hi! What would you like to learn today?
+keyLearningPoints:
+stepByStepExplanation:
+causeAndEffect:
+quizQuestions:
+Stop here.
 
-------------------------------
-LEARNING PACK RULES
-------------------------------
+------------------------------------
+LEARNING PACK FORMAT (STRICT)
+------------------------------------
+You MUST return the answer in this EXACT structure:
 
-simpleSummary:
-A short 3–5 sentence explanation of the topic.
+simpleSummary: <3–5 sentence explanation>
 
 keyLearningPoints:
-3–5 key ideas.
-Each item must have:
-- title: short phrase
-- description: 1–2 sentence explanation.
+- title: <short phrase>
+  description: <1–2 sentences>
+- title: <short phrase>
+  description: <1–2 sentences>
+- title: <short phrase>
+  description: <1–2 sentences>
 
 stepByStepExplanation:
-3–6 short steps.
+- <short step>
+- <short step>
+- <short step>
 
 causeAndEffect:
-2–4 items.
-Each item must have:
-- cause: why something happens
-- effect: what the result is.
+- cause: <text>
+  effect: <text>
+- cause: <text>
+  effect: <text>
 
 quizQuestions:
-3–5 MCQs.
-Each item must have:
-- question
-- options (4 choices)
-- correctAnswer (must exactly match one option)
+- question: <text>
+  options: [A, B, C, D]
+  correctAnswer: <must match exactly one of the options>
 
-------------------------------
+------------------------------------
 TOPIC
-------------------------------
+------------------------------------
 The topic is: "{{{message}}}"
 
-If a document is provided, use it as context.
+If a document is provided, use it as additional context.
 `,
 });
 
@@ -102,8 +105,16 @@ export async function getChatbotResponse(
     return await chatbotFlow(input);
   } catch (error) {
     console.error("Vedro AI Error:", error);
-    throw new Error(
-      "The Vedro AI is currently busy. Please try again in a moment."
-    );
+    // Create a user-friendly error structure that matches the expected schema
+    // to prevent the UI from breaking.
+    const errorPack: LearningPack = {
+      simpleSummary:
+        "The Vedro AI is currently pondering... It seems I've hit a snag. Please try your question again in a moment.",
+      keyLearningPoints: [],
+      stepByStepExplanation: [],
+      causeAndEffect: [],
+      quizQuestions: [],
+    };
+    return errorPack;
   }
 }
