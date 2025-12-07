@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { generateExperimentExplanation } from '../actions';
 import { Button } from '@/components/ui/button';
 import { BookCopy, Loader2, Sparkles, RefreshCw, Plus } from 'lucide-react';
@@ -19,44 +19,45 @@ type Item = {
   id: string;
   name: string;
   category: 'Chemistry' | 'Physics' | 'Biology' | 'Tools';
+  description: string;
 };
 
 const INVENTORY: Record<string, Item[]> = {
   Chemistry: [
-    { id: 'hcl', name: 'HCl', category: 'Chemistry' },
-    { id: 'naoh', name: 'NaOH', category: 'Chemistry' },
-    { id: 'cuso4', name: 'CuSO4', category: 'Chemistry' },
-    { id: 'zn', name: 'Zn', category: 'Chemistry' },
-    { id: 'agno3', name: 'AgNO3', category: 'Chemistry' },
-    { id: 'nacl', name: 'NaCl', category: 'Chemistry' },
-    { id: 'fe', name: 'Fe', category: 'Chemistry' },
-    { id: 'mg', name: 'Mg', category: 'Chemistry' },
-    { id: 'sugar', name: 'Sugar', category: 'Chemistry' },
-    { id: 'water_chem', name: 'Water', category: 'Chemistry' },
+    { id: 'hcl', name: 'HCl', category: 'Chemistry', description: 'Hydrochloric Acid' },
+    { id: 'naoh', name: 'NaOH', category: 'Chemistry', description: 'Sodium Hydroxide' },
+    { id: 'cuso4', name: 'CuSO4', category: 'Chemistry', description: 'Copper Sulfate' },
+    { id: 'zn', name: 'Zn', category: 'Chemistry', description: 'Zinc' },
+    { id: 'agno3', name: 'AgNO3', category: 'Chemistry', description: 'Silver Nitrate' },
+    { id: 'nacl', name: 'NaCl', category: 'Chemistry', description: 'Sodium Chloride' },
+    { id: 'fe', name: 'Fe', category: 'Chemistry', description: 'Iron' },
+    { id: 'mg', name: 'Mg', category: 'Chemistry', description: 'Magnesium' },
+    { id: 'sugar', name: 'Sugar', category: 'Chemistry', description: 'Sucrose' },
+    { id: 'water_chem', name: 'Water', category: 'Chemistry', description: 'H₂O' },
   ],
   Physics: [
-    { id: 'battery', name: 'Battery', category: 'Physics' },
-    { id: 'wire', name: 'Wire', category: 'Physics' },
-    { id: 'bulb', name: 'Bulb', category: 'Physics' },
-    { id: 'motor', name: 'Motor', category: 'Physics' },
-    { id: 'switch', name: 'Switch', category: 'Physics' },
-    { id: 'magnet', name: 'Magnet', category: 'Physics' },
-    { id: 'iron_nail', name: 'Iron Nail', category: 'Physics' },
+    { id: 'battery', name: 'Battery', category: 'Physics', description: '9V Power Source' },
+    { id: 'wire', name: 'Wire', category: 'Physics', description: 'Copper Wire' },
+    { id: 'bulb', name: 'Bulb', category: 'Physics', description: 'Light Bulb' },
+    { id: 'motor', name: 'Motor', category: 'Physics', description: 'Electric Motor' },
+    { id: 'switch', name: 'Switch', category: 'Physics', description: 'Circuit Switch' },
+    { id: 'magnet', name: 'Magnet', category: 'Physics', description: 'Bar Magnet' },
+    { id: 'iron_nail', name: 'Iron Nail', category: 'Physics', description: 'A small nail' },
   ],
   Biology: [
-    { id: 'plant', name: 'Plant', category: 'Biology' },
-    { id: 'sunlight', name: 'Sunlight', category: 'Biology' },
-    { id: 'water_bio', name: 'Water', category: 'Biology' },
-    { id: 'co2', name: 'CO2 Bubble', category: 'Biology' },
-    { id: 'seed', name: 'Seed', category: 'Biology' },
-    { id: 'fertilizer', name: 'Fertilizer', category: 'Biology' },
-    { id: 'soil', name: 'Soil', category: 'Biology' },
+    { id: 'plant', name: 'Plant', category: 'Biology', description: 'Green plant' },
+    { id: 'sunlight', name: 'Sunlight', category: 'Biology', description: 'Light Energy' },
+    { id: 'water_bio', name: 'Water', category: 'Biology', description: 'H₂O for life' },
+    { id: 'co2', name: 'CO2 Bubble', category: 'Biology', description: 'Carbon Dioxide' },
+    { id: 'seed', name: 'Seed', category: 'Biology', description: 'A plant seed' },
+    { id: 'fertilizer', name: 'Fertilizer', category: 'Biology', description: 'Plant Nutrients' },
+    { id: 'soil', name: 'Soil', category: 'Biology', description: 'Rich soil' },
   ],
   Tools: [
-    { id: 'beaker', name: 'Beaker', category: 'Tools' },
-    { id: 'test_tube', name: 'Test Tube', category: 'Tools' },
-    { id: 'burner', name: 'Burner', category: 'Tools' },
-    { id: 'container', name: 'Container', category: 'Tools' },
+    { id: 'beaker', name: 'Beaker', category: 'Tools', description: 'Mixing Vessel' },
+    { id: 'test_tube', name: 'Test Tube', category: 'Tools', description: 'For small samples' },
+    { id: 'burner', name: 'Burner', category: 'Tools', description: 'Heat Source' },
+    { id: 'container', name: 'Container', category: 'Tools', description: 'Holding vessel' },
   ],
 };
 
@@ -75,7 +76,7 @@ const REACTION_RULES: { reactants: string[]; result: string, equation: string, a
 
 // --- UI & LAYOUT COMPONENTS ---
 
-const InventoryPanel = ({ items, onDrag }: { items: Record<string, Item[]>, onDrag: (item: Item) => void }) => (
+const InventoryPanel = ({ items }: { items: Record<string, Item[]> }) => (
   <Card className="lg:col-span-1 h-full flex flex-col">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-primary">
@@ -95,7 +96,7 @@ const InventoryPanel = ({ items, onDrag }: { items: Record<string, Item[]>, onDr
                 {Object.entries(items).map(([category, categoryItems]) => (
                     <TabsContent key={category} value={category} className="grid grid-cols-2 gap-3 mt-0">
                         {categoryItems.map((item) => (
-                            <DraggableItem key={item.id} item={item} onDrag={onDrag} />
+                            <DraggableItem key={item.id} item={item} />
                         ))}
                     </TabsContent>
                 ))}
@@ -128,7 +129,6 @@ const ReactionDisplay = ({ items, reaction }: { items: Item[], reaction: {equati
 // --- MAIN PAGE COMPONENT ---
 
 export default function ExperimentClientPage() {
-  const [inventory, setInventory] = useState<Record<string, Item[]>>(INVENTORY);
   const [beakerContents, setBeakerContents] = useState<Item[]>([]);
   const [explanation, setExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -144,11 +144,6 @@ export default function ExperimentClientPage() {
             description: `${item.name} is already in the beaker.`,
         });
     }
-  };
-
-  const handleDrag = (item: Item) => {
-    // This function is triggered when an item starts being dragged from the inventory
-    // You can add logic here if needed, but for now we just handle the drop
   };
 
   const checkForReaction = (currentItems: Item[]) => {
@@ -204,7 +199,6 @@ export default function ExperimentClientPage() {
   };
 
   const handleReset = () => {
-    setInventory(INVENTORY);
     setBeakerContents([]);
     setExplanation('');
     setReaction(null);
@@ -214,7 +208,7 @@ export default function ExperimentClientPage() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 p-4 lg:p-6 min-h-[80vh]">
-        <InventoryPanel items={inventory} onDrag={handleDrag} />
+        <InventoryPanel items={INVENTORY} />
 
         <div className="lg:col-span-2 flex flex-col gap-6">
           
