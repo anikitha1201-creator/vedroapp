@@ -134,6 +134,11 @@ const AssistantMessage = ({ content }: { content: ChatbotOutput | string }) => {
     if (typeof content === 'string') {
         return <p>{content}</p>;
     }
+    // This is the special handling for greetings. If there are no key learning points,
+    // it's a greeting, so we only show the summary.
+    if (content.keyLearningPoints.length === 0) {
+        return <p>{content.simpleSummary}</p>;
+    }
     return <LearningPackDisplay pack={content} />;
 };
 
