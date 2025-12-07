@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview AI explanations for the Sandbox Experiment.
@@ -8,27 +7,37 @@
  * - ExperimentExplanationOutput - The return type for the getExperimentEixplanation function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import { marked } from 'marked';
-import { runGemini } from '@/ai/geminiClient';
 
 const ExperimentExplanationInputSchema = z.object({
-  experimentDescription:
-    z.string()
-      .describe('A description of the items a student combined in the sandbox, the resulting chemical equation, and the observed result.'),
+  experimentDescription: z
+    .string()
+    .describe(
+      'A description of the items a student combined in the sandbox, the resulting chemical equation, and the observed result.'
+    ),
 });
-export type ExperimentExplanationInput = z.infer<typeof ExperimentExplanationInputSchema>;
+export type ExperimentExplanationInput = z.infer<
+  typeof ExperimentExplanationInputSchema
+>;
 
 const ExperimentExplanationOutputSchema = z.object({
-  explanation: z.string().describe('The AI explanation of the experiment, formatted as Markdown.'),
+  explanation: z
+    .string()
+    .describe('The AI explanation of the experiment, formatted as Markdown.'),
 });
-export type ExperimentExplanationOutput = z.infer<typeof ExperimentExplanationOutputSchema>;
+export type ExperimentExplanationOutput = z.infer<
+  typeof ExperimentExplanationOutputSchema
+>;
 
-export async function getExperimentExplanation(
-  input: ExperimentExplanationInput
-): Promise<ExperimentExplanationOutput> {
-    
+const experimentExplanationFlow = ai.defineFlow(
+  {
+    name: 'experimentExplanationFlow',
+    inputSchema: ExperimentExplanationInputSchema,
+    outputSchema: z.string(),
+  },
+  async (input) => {
     const prompt = `You are an expert science teacher with the persona of a wise, ancient alchemist. A student is using an interactive sandbox and has just performed an experiment.
 
 Your task is to provide a clear, engaging, and educational explanation of the reaction that occurred.
@@ -58,13 +67,26 @@ Suggest a specific follow-up experiment the student could try in the sandbox to 
 
 Keep your tone encouraging, wise, and slightly magical. The goal is to make learning feel like discovering ancient secrets.
   `;
+    const { text } = await ai.generate({
+      model: 'gemini-1.5-flash',
+      prompt: prompt,
+    });
+    return text();
+  }
+);
 
-    try {
-        const text = await runGemini(prompt);
-        const htmlExplanation = await marked.parse(text);
-        return { explanation: htmlExplanation };
-    } catch (error) {
-        console.error("Error in experimentExplanationFlow:", error);
-        return {explanation: "### The Alchemist Ponders...\nThe mixture is inert, like a silent stone in a forgotten library. No reaction occurred with these elements. Perhaps try combining different ingredients from the scrolls?"}
-    }
+export async function getExperimentExplanation(
+  input: ExperimentExplanationInput
+): Promise<ExperimentExplanationOutput> {
+  try {
+    const text = await experimentExplanationFlow(input);
+    const htmlExplanation = await marked.parse(text);
+    return { explanation: htmlExplanation };
+  } catch (error) {
+    console.error('Error in experimentExplanationFlow:', error);
+    return {
+      explanation:
+        "### The Alchemist Ponders...\nThe mixture is inert, like a silent stone in a forgotten library. No reaction occurred with these elements. Perhaps try combining different ingredients from the scrolls?",
+    };
+  }
 }
