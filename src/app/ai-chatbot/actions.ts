@@ -1,10 +1,10 @@
 'use server';
 
 import { getChatbotResponse } from '@/ai/flows/chatbot';
-import type { ChatbotInput, LearningPack } from '@/ai/flows/chatbot.types';
+import type { ChatbotInput, ChatbotOutput } from '@/ai/flows/chatbot.types';
 
 type SafeResult =
-  | { success: true; response: LearningPack }
+  | { success: true; response: ChatbotOutput }
   | { success: false; error: string };
 
 /**

@@ -5,7 +5,12 @@ import { z } from 'genkit';
 
 export const ChatbotInputSchema = z.object({
   message: z.string().describe("The user's message to the chatbot."),
-  fileDataUri: z.string().optional().describe("A file provided by the user as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  fileDataUri: z
+    .string()
+    .optional()
+    .describe(
+      "A file provided by the user as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 export type ChatbotInput = z.infer<typeof ChatbotInputSchema>;
 
@@ -38,8 +43,26 @@ export const LearningPackSchema = z.object({
   causeEffectInfo: z
     .string()
     .describe('A description of how different factors affect the topic.'),
-  miniQuiz: z
-    .array(QuizQuestionSchema)
-    .length(5)
+  miniQuiz: z.array(QuizQuestionSchema).length(5),
 });
 export type LearningPack = z.infer<typeof LearningPackSchema>;
+
+export const SimpleResponseSchema = z.object({
+  reply: z
+    .string()
+    .describe('A simple, conversational reply to a greeting.'),
+});
+export type SimpleResponse = z.infer<typeof SimpleResponseSchema>;
+
+// This union schema allows the AI to return one of two structured responses.
+export const ChatbotOutputSchema = z.union([
+  LearningPackSchema.transform(val => ({
+    type: 'learningPack' as const,
+    data: val,
+  })),
+  SimpleResponseSchema.transform(val => ({
+    type: 'simpleReply' as const,
+    data: val,
+  })),
+]);
+export type ChatbotOutput = z.infer<typeof ChatbotOutputSchema>;
