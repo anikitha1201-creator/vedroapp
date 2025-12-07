@@ -1,13 +1,8 @@
 
-import { FlaskConical, Gamepad2, Puzzle, User, Bot } from 'lucide-react';
+import { FlaskConical, Gamepad2, Puzzle, User } from 'lucide-react';
 import Link from 'next/link';
 
 const dashboardItems = [
-  {
-    title: 'AI Chatbot',
-    href: '/ai-chatbot',
-    icon: <Bot />,
-  },
   {
     title: 'Concept Builder',
     href: '/concept-builder',
