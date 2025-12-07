@@ -90,7 +90,10 @@ const LearningPackDisplay = ({ pack }: { pack: LearningPack }) => {
             {pack.keyLearningPoints.map((point, i) => (
               <li key={i} className="flex items-start gap-2">
                 <ChevronRight className="w-4 h-4 mt-1 text-accent flex-shrink-0" />
-                <span className="text-sm">{point}</span>
+                <div className='flex-1'>
+                    <p className='font-semibold text-sm'>{point.title}</p>
+                    <p className='text-sm text-muted-foreground'>{point.description}</p>
+                </div>
               </li>
             ))}
           </ul>
@@ -111,19 +114,24 @@ const LearningPackDisplay = ({ pack }: { pack: LearningPack }) => {
         </div>
       )}
       
-      {pack.causeEffectInfo && (
+      {pack.causeAndEffect && pack.causeAndEffect.length > 0 && (
         <div>
           <h3 className="font-headline text-lg text-primary mb-2">Cause & Effect</h3>
-          <div className="p-3 rounded-md bg-primary/5 border border-primary/10 text-sm">
-              {pack.causeEffectInfo}
+          <div className="space-y-3">
+             {pack.causeAndEffect.map((item, i) => (
+                <div key={i} className="p-3 rounded-md bg-primary/5 border border-primary/10 text-sm">
+                    <p><span className="font-semibold text-primary/80">Cause:</span> {item.cause}</p>
+                    <p><span className="font-semibold text-primary/80">Effect:</span> {item.effect}</p>
+                </div>
+             ))}
           </div>
         </div>
       )}
 
-      {pack.miniQuiz && pack.miniQuiz.length > 0 && (
+      {pack.quizQuestions && pack.quizQuestions.length > 0 && (
         <div>
           <h3 className="font-headline text-lg text-primary mb-2">Mini Quiz</h3>
-          <MiniQuiz quiz={pack.miniQuiz} />
+          <MiniQuiz quiz={pack.quizQuestions} />
         </div>
       )}
     </div>

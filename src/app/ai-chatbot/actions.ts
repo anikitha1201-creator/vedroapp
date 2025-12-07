@@ -1,10 +1,11 @@
 'use server';
 
 import { getChatbotResponse } from '@/ai/flows/chatbot';
-import type { ChatbotInput, ChatbotOutput } from '@/ai/flows/chatbot.types';
+import type { ChatbotInput, LearningPack } from '@/ai/flows/chatbot.types';
 
+// The safe result now uses the correct LearningPack type
 type SafeResult =
-  | { success: true; response: ChatbotOutput }
+  | { success: true; response: LearningPack }
   | { success: false; error: string };
 
 /**
