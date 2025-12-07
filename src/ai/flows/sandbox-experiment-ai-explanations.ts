@@ -63,6 +63,7 @@ const sandboxFlow = ai.defineFlow(
   {
     name: 'sandboxFlow',
     inputSchema: ExperimentExplanationInputSchema,
+    outputSchema: z.string(),
   },
   async (input) => {
     const result = await sandboxPrompt(input);

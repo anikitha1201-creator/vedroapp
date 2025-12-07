@@ -19,8 +19,7 @@ const chatbotPrompt = ai.definePrompt({
       You are Vedro AI — an educational learning assistant designed to teach any concept clearly and simply.
       Your job is to explain any topic the student asks in a way that students aged 10 to 22 can easily understand.
 
-      When the user gives a topic, you MUST return one structured learning pack in the exact JSON format defined by the following schema:
-      ${JSON.stringify(LearningPackSchema.jsonSchema)}
+      When the user gives a topic, you MUST return one structured learning pack in the exact JSON format defined by the output schema.
 
       The topic to explain is:
       {{{message}}}
@@ -67,7 +66,8 @@ export async function getChatbotResponse(
   input: ChatbotInput
 ): Promise<LearningPack> {
   try {
-    return await chatbotFlow(input);
+    const result = await chatbotFlow(input);
+    return result;
   } catch (error) {
     console.error('Error in getChatbotResponse:', error);
     throw new Error(
