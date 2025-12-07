@@ -7,48 +7,48 @@
 
 @layer base {
   :root {
-    --background: 40 27% 95%;
-    --foreground: 28 48% 11%;
-    --card: 40 44% 88%;
-    --card-foreground: 28 48% 11%;
-    --popover: 34 45% 92%;
-    --popover-foreground: 28 48% 11%;
-    --primary: 28 47% 24%;
-    --primary-foreground: 40 44% 88%;
-    --secondary: 43 44% 55%;
-    --secondary-foreground: 28 48% 11%;
-    --muted: 40 27% 85%;
-    --muted-foreground: 28 47% 30%;
-    --accent: 45 52% 63%;
-    --accent-foreground: 28 48% 11%;
-    --destructive: 10 52% 36%;
-    --destructive-foreground: 40 44% 88%;
-    --border: 28 47% 34%;
-    --input: 40 27% 85%;
-    --ring: 45 52% 63%;
-    --radius: 0.5rem;
+    --background: 220 40% 95%; /* Light Blue-Gray */
+    --foreground: 225 25% 15%; /* Dark Blue */
+    --card: 220 30% 100%;
+    --card-foreground: 225 25% 15%;
+    --popover: 220 30% 100%;
+    --popover-foreground: 225 25% 15%;
+    --primary: 217 71% 53%; /* Blue (#4A90E2) */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 215 50% 90%;
+    --secondary-foreground: 217 71% 53%;
+    --muted: 220 30% 90%;
+    --muted-foreground: 225 10% 40%;
+    --accent: 210 90% 60%;
+    --accent-foreground: 225 25% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 20% 85%;
+    --input: 220 20% 85%;
+    --ring: 217 71% 53%;
+    --radius: 0.8rem;
   }
  
   .dark {
-    --background: 28 48% 11%; /* Deep Burnt Brown */
-    --foreground: 40 44% 88%; /* Parchment Yellow */
-    --card: 28 47% 18%;
-    --card-foreground: 40 44% 88%;
-    --popover: 28 47% 14%;
-    --popover-foreground: 40 44% 88%;
-    --primary: 40 44% 88%; /* Parchment Yellow */
-    --primary-foreground: 28 48% 11%; /* Deep Burnt Brown */
-    --secondary: 43 44% 55%; /* Ochre */
-    --secondary-foreground: 28 48% 11%;
-    --muted: 28 47% 24%; /* Primary Dark Brown */
-    --muted-foreground: 40 27% 66%; /* Dusty Sand */
-    --accent: 45 52% 63%; /* Soft Gold */
-    --accent-foreground: 28 48% 11%;
-    --destructive: 10 52% 46%; /* Ancient Ink Red */
-    --destructive-foreground: 40 44% 88%;
-    --border: 28 47% 24%; /* Primary Dark Brown */
-    --input: 28 47% 24%;
-    --ring: 45 52% 63%; /* Soft Gold */
+    --background: 222 84% 4%; /* Very Dark Blue */
+    --foreground: 210 40% 98%;
+    --card: 222 84% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 84% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 71% 53%; /* Blue (#4A90E2) */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 215 30% 25%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 210 90% 60%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 217 71% 53%;
   }
 }
  
@@ -59,6 +59,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "liga" 1, "calt" 1;
+    background: linear-gradient(180deg, hsl(217, 71%, 53%), hsl(220, 78%, 45%));
   }
 
   /* Custom Scrollbar Styling */
@@ -68,14 +69,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
+    background: hsl(var(--background) / 0.5);
     border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.5);
+    background: hsl(var(--primary) / 0.8);
     border-radius: 10px;
-    border: 3px solid hsl(var(--background));
+    border: 3px solid transparent;
+    background-clip: content-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -85,7 +87,7 @@
   /* For Firefox */
   html {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--primary)) hsl(var(--background));
+    scrollbar-color: hsl(var(--primary)) transparent;
   }
 }
 
@@ -95,14 +97,13 @@
   }
 
   .burnt-edge {
-    box-shadow: 
-      inset 0 0 10px 5px hsl(var(--background)),
-      0 0 3px 1px hsl(var(--border));
-    border: 2px solid transparent;
+     border-radius: var(--radius);
+     border: 1px solid hsl(var(--border));
+     box-shadow: 0 4px 15px -2px hsl(var(--background) / 0.1);
   }
   
   .burnt-edge-pulse:hover, .burnt-edge-pulse {
-    animation: burnt-edge-pulse 2s infinite;
+    animation: blue-glow 2s infinite;
   }
 
   .wax-press:active {
@@ -119,7 +120,7 @@
     inset: 0;
     border-radius: inherit;
     opacity: 0;
-    animation: torch-flicker 5s infinite;
+    animation: subtle-glow 5s infinite;
     pointer-events: none;
   }
 
@@ -139,11 +140,11 @@
   }
 
   .gold-burst {
-    animation: gold-flare 0.7s ease-out forwards;
+    animation: correct-celebration 0.7s ease-out forwards;
   }
 
   .red-ink-splash {
-    animation: red-ink-splash 0.7s ease-out forwards;
+    animation: incorrect-penalty 0.7s ease-out forwards;
   }
 
 }

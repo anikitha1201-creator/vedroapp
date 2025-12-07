@@ -1,126 +1,137 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Check, Flame, X, Trophy, Repeat, ChevronLeft, ChevronRight, BookOpen, Footprints } from 'lucide-react';
+import { Check, X, Trophy, Repeat, Play, Pause, Award, Zap } from 'lucide-react';
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { Progress } from '@/components/ui/progress';
 
+// --- DATA ---
 const questions = [
   {
     question: 'What is the chemical symbol for Gold?',
     options: ['Ag', 'Au', 'Ge'],
     answer: 'Au',
-    explanation: 'Au is the symbol for Gold, derived from its Latin name, "aurum". Ag is Silver and Ge is Germanium.',
   },
   {
     question: 'Which planet is known as the Red Planet?',
     options: ['Mars', 'Jupiter', 'Venus'],
     answer: 'Mars',
-    explanation: 'Mars is called the Red Planet because its surface is covered in iron oxide (rust), giving it a reddish appearance.',
   },
   {
     question: 'What is the powerhouse of the cell?',
     options: ['Nucleus', 'Ribosome', 'Mitochondria'],
     answer: 'Mitochondria',
-    explanation: 'Mitochondria are responsible for generating most of the cell\'s supply of adenosine triphosphate (ATP), used as a source of chemical energy.',
   },
   {
     question: 'H2O is the chemical formula for?',
     options: ['Oxygen', 'Water', 'Hydrogen Peroxide'],
     answer: 'Water',
-    explanation: 'The formula H2O indicates that one molecule of water is composed of two hydrogen atoms and one oxygen atom.',
   },
   {
     question: 'What force keeps us on the ground?',
     options: ['Magnetism', 'Gravity', 'Friction'],
     answer: 'Gravity',
-    explanation: 'Gravity is the fundamental force of attraction that all matter with mass exerts on other matter.',
   },
-  {
-    question: 'How many continents are there on Earth?',
-    options: ['5', '6', '7'],
-    answer: '7',
-    explanation: 'The seven continents are Asia, Africa, North America, South America, Antarctica, Europe, and Australia.',
-  }
 ];
 
-type GameState = 'start' | 'playing' | 'question' | 'result' | 'end';
+
+// --- TYPES ---
+type GameState = 'start' | 'playing' | 'question' | 'paused' | 'end';
 type ResultState = 'correct' | 'incorrect' | null;
 
-const Lane = ({ option, onClick, result, answer, disabled, isSelected }: { option: string, onClick: () => void, result: ResultState, answer: string, disabled: boolean, isSelected: boolean }) => (
-    <div
-        onClick={!disabled ? onClick : undefined}
-        className={cn(
-            "relative flex items-center justify-center h-48 p-4 rounded-lg border-2 border-dashed transition-all duration-300 cursor-pointer group burnt-edge",
-            "border-primary/20 hover:border-accent hover:bg-accent/10",
-            disabled && "cursor-not-allowed opacity-60",
-            isSelected && result === 'correct' && "border-accent bg-accent/20 scale-105 gold-burst",
-            isSelected && result === 'incorrect' && "border-destructive bg-destructive/10 scale-105 red-ink-splash"
-        )}
-    >
-        <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"></div>
-        <span className="text-3xl font-bold font-headline text-primary group-hover:text-accent transition-colors z-10">{option}</span>
+
+// --- GAME COMPONENTS ---
+
+const Character = ({ lane, isRunning }: { lane: number; isRunning: boolean; }) => {
+  const lanePositions = ['-translate-x-[110%]', 'translate-x-0', 'translate-x-[110%]'];
+  return (
+    <div className={cn("absolute bottom-4 left-1/2 -ml-8 transition-transform duration-300 ease-in-out", lanePositions[lane])}>
+       <div className={cn("w-16 h-24 rounded-t-full bg-accent/80 flex items-center justify-center", isRunning ? 'animate-bounce' : '')}>
+          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-primary font-bold text-lg">V</div>
+       </div>
+    </div>
+  );
+};
+
+
+const Lane = ({ option, onClick, result, disabled, isSelected }: { option: string; onClick: () => void; result: ResultState; disabled: boolean; isSelected: boolean; }) => (
+  <div
+    onClick={!disabled ? onClick : undefined}
+    className={cn(
+      "relative flex items-center justify-center h-40 p-4 rounded-lg border-2 border-dashed transition-all duration-300 cursor-pointer group",
+      "border-white/20 bg-black/10 hover:border-white/50 hover:bg-black/20",
+      disabled && "cursor-not-allowed opacity-60",
+      isSelected && result === 'correct' && "border-green-400 bg-green-500/20 gold-burst",
+      isSelected && result === 'incorrect' && "border-red-500 bg-red-500/20 incorrect-penalty"
+    )}
+  >
+    <span className="text-3xl font-bold text-white drop-shadow-lg group-hover:scale-105 transition-transform z-10">{option}</span>
+  </div>
+);
+
+
+const Background = ({ speed }: { speed: number }) => (
+    <div className="absolute inset-0 z-0 overflow-hidden">
+        <div 
+            className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30"
+            style={{
+                animation: `speed-lines ${10 / speed}s linear infinite`
+            }}
+        ></div>
+         <div className="absolute top-1/2 left-0 w-full h-1/2 bg-gradient-to-t from-primary/80 to-transparent"></div>
+         <div className="absolute bottom-0 left-0 w-full h-1/3 bg-primary/90"></div>
     </div>
 );
 
-const Character = ({ lane }: { lane: number }) => {
-    const lanePositions = ['-translate-x-full', 'translate-x-0', 'translate-x-full'];
-    return (
-        <div className={cn("absolute bottom-8 left-1/2 -ml-6 transition-transform duration-300 ease-in-out", lanePositions[lane])}>
-            <Footprints className="w-12 h-12 text-primary" />
-        </div>
-    )
-}
+
+// --- MAIN GAME LOGIC ---
 
 export default function QuizRunnerClient() {
+  // Game state
   const [gameState, setGameState] = useState<GameState>('start');
   const [shuffledQuestions, setShuffledQuestions] = useState(questions);
   const [questionIndex, setQuestionIndex] = useState(0);
+  
+  // Player state
   const [score, setScore] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [result, setResult] = useState<ResultState>(null);
-  const [runProgress, setRunProgress] = useState(0);
-  const [characterLane, setCharacterLane] = useState(1); // 0: left, 1: middle, 2: right
+  const [characterLane, setCharacterLane] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState<string|null>(null);
-
+  const [timeToQuestion, setTimeToQuestion] = useState(7); // 7 seconds until next question
 
   const currentQuestion = useMemo(() => shuffledQuestions[questionIndex], [shuffledQuestions, questionIndex]);
 
-  // Shuffle questions at the start of the game
-  const shuffleQuestions = () => {
-    setShuffledQuestions(prev => [...prev].sort(() => Math.random() - 0.5));
-  }
-
-  // Runner progress timer
+  // --- GAME LOOP ---
   useEffect(() => {
-    if (gameState !== 'playing') {
-      if(gameState !== 'question') setRunProgress(0);
+    if (gameState !== 'playing') return;
+
+    if (timeToQuestion <= 0) {
+      setGameState('question');
+      setTimeToQuestion(7); // Reset timer
       return;
-    };
+    }
 
-    const progressInterval = setInterval(() => {
-      setRunProgress(prev => {
-        if (prev >= 100) {
-          setGameState('question');
-          return 100;
-        }
-        return prev + speed; // Use speed to control progress
-      });
-    }, 100);
+    const timer = setInterval(() => {
+      setTimeToQuestion(prev => prev - 1);
+    }, 1000);
 
-    return () => clearInterval(progressInterval);
-  }, [gameState, speed]);
+    return () => clearInterval(timer);
+  }, [gameState, timeToQuestion]);
 
-
+  // --- ACTIONS ---
   const startGame = () => {
-    shuffleQuestions();
+    // Shuffle questions for a new game
+    setShuffledQuestions(prev => [...prev].sort(() => Math.random() - 0.5));
     setQuestionIndex(0);
     setScore(0);
     setResult(null);
-    setRunProgress(0);
-    setSpeed(1);
     setCharacterLane(1);
+    setSpeed(1);
+    setTimeToQuestion(7);
     setGameState('playing');
   };
 
@@ -129,59 +140,61 @@ export default function QuizRunnerClient() {
     
     setCharacterLane(laneIndex);
     setSelectedAnswer(selectedOption);
-    setGameState('result');
     
     if (selectedOption === currentQuestion.answer) {
       setResult('correct');
-      setScore(prev => prev + 100 * speed); // Score bonus for speed
-      setSpeed(prev => Math.min(prev + 0.2, 3)); // Speed boost
+      setScore(prev => prev + 100);
+      setSpeed(prev => Math.min(prev + 0.1, 2)); // Slightly increase speed
     } else {
       setResult('incorrect');
       setScore(prev => Math.max(0, prev - 50)); // Penalty
-      setSpeed(prev => Math.max(prev - 0.5, 0.5)); // Speed drop
     }
 
+    // Wait for animation, then continue or end game
     setTimeout(() => {
       if (questionIndex + 1 < shuffledQuestions.length) {
         setQuestionIndex(prev => prev + 1);
-        setRunProgress(0);
         setResult(null);
         setSelectedAnswer(null);
         setGameState('playing');
       } else {
         setGameState('end');
       }
-    }, 2500);
+    }, 2000);
   };
 
+  // --- RENDER LOGIC ---
+
+  // Main Menu Screen
   if (gameState === 'start') {
     return (
-      <Card className="text-center max-w-lg mx-auto torch-flicker">
+      <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-bounce-in">
         <CardHeader>
-          <CardTitle className="text-3xl">Running Quiz Adventure</CardTitle>
-          <CardDescription>Test your knowledge at speed. Choose the correct path before time runs out!</CardDescription>
+          <CardTitle className="text-3xl text-primary-foreground">Running Quiz</CardTitle>
+          <CardDescription className="text-primary-foreground/80">Answer questions by choosing the correct path!</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={startGame} size="lg" className="wax-press">
-            <Flame className="mr-2"/>
-            Start the Run
+          <Button onClick={startGame} size="lg" className="wax-press bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Play className="mr-2"/>
+            Start Running
           </Button>
         </CardContent>
       </Card>
     );
   }
 
+  // Game Over Screen
   if (gameState === 'end') {
      return (
-      <Card className="text-center max-w-lg mx-auto animate-[ink-fade-in_1s_ease-out_forwards] torch-flicker">
+      <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-bounce-in">
         <CardHeader>
           <Trophy className="h-16 w-16 mx-auto text-accent"/>
-          <CardTitle className="text-3xl">Run Complete!</CardTitle>
+          <CardTitle className="text-3xl text-primary-foreground">Run Complete!</CardTitle>
+          <CardDescription className="text-primary-foreground/80">Great job, scholar!</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-4xl font-bold text-accent mb-2">{Math.round(score)}</p>
-          <p className="text-muted-foreground mb-6">A scholar's mind is sharpened by challenge.</p>
-          <Button onClick={startGame} size="lg" className="wax-press">
+        <CardContent className="space-y-4">
+          <p className="text-5xl font-bold text-white">{score}</p>
+          <Button onClick={startGame} size="lg" className="wax-press bg-accent hover:bg-accent/90 text-accent-foreground">
             <Repeat className="mr-2"/>
             Run Again
           </Button>
@@ -190,61 +203,83 @@ export default function QuizRunnerClient() {
     );
   }
   
-  const isAnswering = gameState === 'question' || gameState === 'result';
+  // Game is Paused
+  if (gameState === 'paused') {
+    return (
+     <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-bounce-in">
+       <CardHeader>
+         <CardTitle className="text-3xl text-primary-foreground">Game Paused</CardTitle>
+       </CardHeader>
+       <CardContent>
+         <Button onClick={() => setGameState('playing')} size="lg" className="wax-press bg-accent hover:bg-accent/90 text-accent-foreground">
+           <Play className="mr-2"/>
+           Resume
+         </Button>
+       </CardContent>
+     </Card>
+   );
+ }
 
+  const isAnswering = gameState === 'question' || result !== null;
+
+  // Main Game Screen
   return (
-    <div className="relative w-full max-w-4xl mx-auto p-4 md:p-6 rounded-lg bg-card/50 burnt-edge overflow-hidden">
-        {result === 'correct' && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"><div className="w-48 h-48 rounded-full bg-accent/80 animate-[gold-flare_0.7s_ease-out_forwards]"></div></div>}
-        {result === 'incorrect' && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"><div className="w-48 h-48 text-destructive/80 animate-[red-ink-splash_0.7s_ease-out_forwards]"><X className="w-full h-full"/></div></div>}
+    <div className="relative w-full max-w-5xl h-[70vh] mx-auto p-4 rounded-lg bg-primary/70 shadow-2xl overflow-hidden flex flex-col">
+        <Background speed={speed} />
       
-      {/* HUD */}
-      <div className="flex justify-between items-center mb-4 text-lg font-bold">
-        <div className="text-primary">Score: {Math.round(score)}</div>
-        <div className={cn("text-accent flex items-center gap-1")}>
-            <Flame size={20}/> Speed: x{speed.toFixed(1)}
+        {/* HUD */}
+        <div className="relative z-10 flex justify-between items-center mb-4 text-lg font-bold text-white">
+            <div className="flex items-center gap-2 bg-black/20 px-3 py-1 rounded-full">
+                <Award size={20}/> 
+                <span>Score: {score}</span>
+            </div>
+             <Button variant="ghost" size="icon" onClick={() => setGameState('paused')}>
+                <Pause />
+            </Button>
+            <div className="flex items-center gap-2 bg-black/20 px-3 py-1 rounded-full">
+                <Zap size={20}/>
+                <span>Speed: x{speed.toFixed(1)}</span>
+            </div>
         </div>
-      </div>
+
+        {/* Runner Track */}
+        <div className="relative flex-1 w-full flex flex-col justify-end">
+            <Character lane={characterLane} isRunning={gameState === 'playing'} />
+        </div>
       
-       {/* Runner Track */}
-       <div className="relative w-full h-24 bg-primary/10 rounded-lg mb-6 border border-primary/20 overflow-hidden">
-         <div className="absolute top-0 left-0 h-full w-full speed-lines-bg"></div>
-         <div className="absolute top-1/2 -mt-3 left-0 w-full h-6">
-            <Character lane={characterLane}/>
-         </div>
-         <div className="absolute bottom-2 left-2 text-primary font-bold">
-            PROGRESS: {(runProgress).toFixed(0)}%
-         </div>
-      </div>
+        {/* Question Overlay */}
+        <div className={cn(
+            "absolute inset-0 z-20 flex flex-col justify-center items-center p-8 bg-black/50 backdrop-blur-sm transition-opacity duration-500",
+            isAnswering ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}>
+             <Card className="text-center mb-6 bg-card/90 animate-bounce-in w-full max-w-2xl">
+                <CardHeader>
+                    <CardDescription>Question {questionIndex + 1}</CardDescription>
+                    <CardTitle className="text-2xl">{currentQuestion.question}</CardTitle>
+                </CardHeader>
+             </Card>
 
-      {/* Question and Path Area */}
-      <div className={cn("transition-all duration-500", !isAnswering && "opacity-20 blur-sm pointer-events-none")}>
-         <Card className="text-center mb-6 burnt-edge-pulse">
-            <CardHeader>
-                <CardDescription>Question {questionIndex + 1} of {shuffledQuestions.length}</CardDescription>
-                <CardTitle className="text-2xl md:text-3xl">{currentQuestion.question}</CardTitle>
-            </CardHeader>
-             {gameState === 'result' && (
-                <CardContent className="animate-ink-fade-in">
-                    <p className={cn("font-semibold", result === 'correct' ? 'text-accent' : 'text-destructive')}>{result === 'correct' ? 'Correct!' : 'Not quite!'}</p>
-                    <p className="text-muted-foreground text-sm mt-1">{currentQuestion.explanation}</p>
-                </CardContent>
-             )}
-         </Card>
-
-        <div className="grid grid-cols-3 gap-4">
-            {currentQuestion.options.map((option, index) => (
-              <Lane
-                key={option}
-                option={option}
-                onClick={() => handleAnswer(option, index)}
-                disabled={gameState !== 'question'}
-                result={result}
-                answer={currentQuestion.answer}
-                isSelected={selectedAnswer === option}
-              />
-            ))}
+            <div className="w-full max-w-4xl grid grid-cols-3 gap-4">
+                {currentQuestion.options.map((option, index) => (
+                <Lane
+                    key={index}
+                    option={option}
+                    onClick={() => handleAnswer(option, index)}
+                    disabled={result !== null}
+                    result={result}
+                    isSelected={selectedAnswer === option}
+                />
+                ))}
+            </div>
         </div>
-      </div>
+
+        {/* Progress to next question */}
+        { gameState === 'playing' && (
+             <div className="relative z-10 mt-4">
+                <p className="text-center text-white/80 text-sm mb-1">Next question in...</p>
+                <Progress value={(timeToQuestion / 7) * 100} className="w-1/2 mx-auto h-2 bg-white/20"/>
+            </div>
+        )}
     </div>
   );
 }

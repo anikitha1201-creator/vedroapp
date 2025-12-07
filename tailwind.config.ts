@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -10,8 +11,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ["'Literata'", 'serif'],
-        headline: ["'Literata'", 'serif'],
+        body: ["'Quicksand'", 'sans-serif'],
+        headline: ["'Quicksand'", 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
@@ -107,6 +108,11 @@ export default {
           '60%': { opacity: '0.12', boxShadow: '0 0 28px 14px hsla(var(--accent) / 0.18)' },
           '80%': { opacity: '0.07', boxShadow: '0 0 23px 11px hsla(var(--accent) / 0.13)' },
         },
+         'bounce-in': {
+          '0%': { opacity: '0', transform: 'scale(0.8)' },
+          '70%': { opacity: '1', transform: 'scale(1.05)' },
+          '100%': { transform: 'scale(1)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -115,6 +121,7 @@ export default {
         'ink-fade-in': 'ink-fade-in 1s ease-out forwards',
         'burnt-edge-pulse': 'burnt-edge-pulse 2s infinite',
         'torch-flicker': 'torch-flicker 5s infinite',
+        'bounce-in': 'bounce-in 0.5s ease-out forwards',
       },
     },
   },

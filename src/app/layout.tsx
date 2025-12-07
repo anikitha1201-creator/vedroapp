@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -22,6 +23,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&display=swap"
+          rel="stylesheet"
+        />
+         <link
+          href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
       </head>
