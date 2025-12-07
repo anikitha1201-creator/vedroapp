@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect, useTransition } from 'react';
-import { Bot, User, Send, Loader2, Zap, Lightbulb, BookOpen, BrainCircuit, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bot, User, Send, Loader2, Zap, Lightbulb, BookOpen, BrainCircuit, HelpCircle, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getLearningPack } from './actions';
-import { type LearningPack } from '@/ai/flows/chatbot.types';
+import { type LearningPack, type QuizQuestion as QuizQuestionType } from '@/ai/flows/chatbot.types';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
@@ -22,6 +22,57 @@ const UserMessage = ({ text }: { text: string }) => (
     </div>
   </div>
 );
+
+const QuizQuestion = ({ question, index }: { question: QuizQuestionType; index: number }) => {
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+
+  const handleAnswer = (option: string) => {
+    if (selectedAnswer) return; // Prevent changing answer
+    setSelectedAnswer(option);
+    setIsCorrect(option === question.correctAnswer);
+  };
+
+  return (
+    <div className="text-sm p-3 rounded-lg bg-background/50 border border-border">
+      <p className="font-semibold mb-3">{index + 1}. {question.question}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {question.options.map((option, i) => {
+          const isSelected = selectedAnswer === option;
+          const isTheCorrectAnswer = option === question.correctAnswer;
+
+          return (
+            <Button
+              key={i}
+              variant={
+                selectedAnswer
+                  ? isTheCorrectAnswer ? 'success' : isSelected ? 'destructive' : 'outline'
+                  : 'outline'
+              }
+              className={cn(
+                "h-auto py-2 justify-start text-left",
+                selectedAnswer && isTheCorrectAnswer && 'green-burst',
+                selectedAnswer && !isTheCorrectAnswer && isSelected && 'animate-shake'
+              )}
+              onClick={() => handleAnswer(option)}
+              disabled={!!selectedAnswer}
+            >
+              {selectedAnswer && isSelected && !isTheCorrectAnswer && <XCircle className="mr-2" />}
+              {selectedAnswer && isTheCorrectAnswer && <CheckCircle className="mr-2" />}
+              {option}
+            </Button>
+          );
+        })}
+      </div>
+      {selectedAnswer && !isCorrect && (
+         <p className="text-xs mt-3 text-green-600 dark:text-green-400 font-semibold">
+           Correct Answer: {question.correctAnswer}
+         </p>
+      )}
+    </div>
+  );
+};
+
 
 const AIMessage = ({ pack }: { pack: LearningPack }) => {
   const isGreeting = pack.keyLearningPoints.length === 0 && pack.quizQuestions.length === 0;
@@ -99,15 +150,7 @@ const AIMessage = ({ pack }: { pack: LearningPack }) => {
               <AccordionContent className="p-4 border-t border-border">
                 <div className="space-y-4">
                   {pack.quizQuestions.map((q, index) => (
-                    <div key={index} className="text-sm">
-                      <p className="font-semibold">{index + 1}. {q.question}</p>
-                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
-                        {q.options.map((opt, i) => (
-                          <li key={i}>{opt}</li>
-                        ))}
-                      </ul>
-                       <p className="text-xs mt-2 text-accent">Correct Answer: {q.correctAnswer}</p>
-                    </div>
+                    <QuizQuestion key={index} question={q} index={index} />
                   ))}
                 </div>
               </AccordionContent>
@@ -220,3 +263,5 @@ export default function AiChatbotPage() {
     </div>
   );
 }
+
+    
