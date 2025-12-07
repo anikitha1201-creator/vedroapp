@@ -147,4 +147,9 @@
     animation: red-ink-splash-anim 0.7s ease-out forwards;
   }
 
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
 }
+

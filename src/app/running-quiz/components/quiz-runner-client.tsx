@@ -4,8 +4,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Check, X, Trophy, Repeat, Play, Pause, Award, Zap } from 'lucide-react';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { Award, Pause, Play, Repeat, Trophy, Zap } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
 import { Progress } from '@/components/ui/progress';
 
 // --- DATA ---
@@ -35,6 +35,16 @@ const questions = [
     options: ['Magnetism', 'Gravity', 'Friction'],
     answer: 'Gravity',
   },
+  {
+    question: 'What is the largest mammal in the world?',
+    options: ['Elephant', 'Blue Whale', 'Giraffe'],
+    answer: 'Blue Whale',
+  },
+  {
+    question: 'Who wrote the play "Romeo and Juliet"?',
+    options: ['Charles Dickens', 'William Shakespeare', 'Jane Austen'],
+    answer: 'William Shakespeare',
+  }
 ];
 
 
@@ -45,12 +55,19 @@ type ResultState = 'correct' | 'incorrect' | null;
 
 // --- GAME COMPONENTS ---
 
-const Character = ({ lane, isRunning }: { lane: number; isRunning: boolean; }) => {
+const Character = ({ lane, result }: { lane: number; result: ResultState; }) => {
   const lanePositions = ['-translate-x-[110%]', 'translate-x-0', 'translate-x-[110%]'];
+  
   return (
-    <div className={cn("absolute bottom-4 left-1/2 -ml-8 transition-transform duration-300 ease-in-out", lanePositions[lane])}>
-       <div className={cn("w-16 h-24 rounded-t-full bg-accent/80 flex items-center justify-center", isRunning ? 'animate-bounce' : '')}>
+    <div className={cn("absolute bottom-10 left-1/2 -ml-8 transition-transform duration-300 ease-in-out", lanePositions[lane])}>
+       <div className={cn(
+           "w-16 h-24 rounded-t-full bg-accent/80 flex items-center justify-center relative transition-all",
+           result === 'correct' && 'animate-bounce',
+           result === 'incorrect' && 'animate-shake'
+        )}>
           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-primary font-bold text-lg">V</div>
+          {result === 'correct' && <div className="absolute -top-4 text-2xl">✨</div>}
+          {result === 'incorrect' && <div className="absolute -top-4 text-2xl">💢</div>}
        </div>
     </div>
   );
@@ -64,8 +81,8 @@ const Lane = ({ option, onClick, result, disabled, isSelected }: { option: strin
       "relative flex items-center justify-center h-40 p-4 rounded-lg border-2 border-dashed transition-all duration-300 cursor-pointer group",
       "border-white/20 bg-black/10 hover:border-white/50 hover:bg-black/20",
       disabled && "cursor-not-allowed opacity-60",
-      isSelected && result === 'correct' && "border-green-400 bg-green-500/20 gold-burst",
-      isSelected && result === 'incorrect' && "border-red-500 bg-red-500/20 incorrect-penalty"
+      isSelected && result === 'correct' && "border-accent bg-accent/20 gold-burst",
+      isSelected && result === 'incorrect' && "border-destructive bg-destructive/20 red-ink-splash"
     )}
   >
     <span className="text-3xl font-bold text-white drop-shadow-lg group-hover:scale-105 transition-transform z-10">{option}</span>
@@ -76,9 +93,9 @@ const Lane = ({ option, onClick, result, disabled, isSelected }: { option: strin
 const Background = ({ speed }: { speed: number }) => (
     <div className="absolute inset-0 z-0 overflow-hidden">
         <div 
-            className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30"
+            className="absolute inset-0 bg-repeat-x speed-lines-bg opacity-30"
             style={{
-                animation: `speed-lines ${10 / speed}s linear infinite`
+                animationDuration: `${10 / speed}s`
             }}
         ></div>
          <div className="absolute top-1/2 left-0 w-full h-1/2 bg-gradient-to-t from-primary/80 to-transparent"></div>
@@ -101,9 +118,14 @@ export default function QuizRunnerClient() {
   const [result, setResult] = useState<ResultState>(null);
   const [characterLane, setCharacterLane] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState<string|null>(null);
-  const [timeToQuestion, setTimeToQuestion] = useState(7); // 7 seconds until next question
+  const [timeToQuestion, setTimeToQuestion] = useState(5); // 5 seconds until next question
 
-  const currentQuestion = useMemo(() => shuffledQuestions[questionIndex], [shuffledQuestions, questionIndex]);
+  const currentQuestion = useMemo(() => {
+      const q = shuffledQuestions[questionIndex];
+      // Ensure options are shuffled for presentation
+      const options = [...q.options].sort(() => Math.random() - 0.5);
+      return {...q, options};
+  }, [shuffledQuestions, questionIndex]);
 
   // --- GAME LOOP ---
   useEffect(() => {
@@ -111,7 +133,7 @@ export default function QuizRunnerClient() {
 
     if (timeToQuestion <= 0) {
       setGameState('question');
-      setTimeToQuestion(7); // Reset timer
+      setTimeToQuestion(5 + Math.floor(Math.random()*2)); // 5-7 seconds
       return;
     }
 
@@ -131,7 +153,7 @@ export default function QuizRunnerClient() {
     setResult(null);
     setCharacterLane(1);
     setSpeed(1);
-    setTimeToQuestion(7);
+    setTimeToQuestion(5);
     setGameState('playing');
   };
 
@@ -141,13 +163,14 @@ export default function QuizRunnerClient() {
     setCharacterLane(laneIndex);
     setSelectedAnswer(selectedOption);
     
-    if (selectedOption === currentQuestion.answer) {
+    if (selectedOption === questions[questionIndex].answer) { // Check against original question object
       setResult('correct');
-      setScore(prev => prev + 100);
-      setSpeed(prev => Math.min(prev + 0.1, 2)); // Slightly increase speed
+      setScore(prev => prev + (10 * speed));
+      setSpeed(prev => Math.min(prev + 0.2, 3)); // Increase speed
     } else {
       setResult('incorrect');
-      setScore(prev => Math.max(0, prev - 50)); // Penalty
+      setScore(prev => Math.max(0, prev - 5)); // Penalty
+      setSpeed(prev => Math.max(1, prev - 0.1)); // Slightly decrease speed
     }
 
     // Wait for animation, then continue or end game
@@ -160,7 +183,7 @@ export default function QuizRunnerClient() {
       } else {
         setGameState('end');
       }
-    }, 2000);
+    }, 1500);
   };
 
   // --- RENDER LOGIC ---
@@ -168,13 +191,13 @@ export default function QuizRunnerClient() {
   // Main Menu Screen
   if (gameState === 'start') {
     return (
-      <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-bounce-in">
+      <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-[bounce-in_0.5s_ease-out_forwards]">
         <CardHeader>
-          <CardTitle className="text-3xl text-primary-foreground">Running Quiz</CardTitle>
-          <CardDescription className="text-primary-foreground/80">Answer questions by choosing the correct path!</CardDescription>
+          <CardTitle className="text-3xl font-headline text-primary">Running Quiz Adventure</CardTitle>
+          <CardDescription>Answer questions by choosing the correct path!</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={startGame} size="lg" className="wax-press bg-accent hover:bg-accent/90 text-accent-foreground">
+          <Button onClick={startGame} size="lg" className="wax-press">
             <Play className="mr-2"/>
             Start Running
           </Button>
@@ -186,15 +209,15 @@ export default function QuizRunnerClient() {
   // Game Over Screen
   if (gameState === 'end') {
      return (
-      <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-bounce-in">
+      <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-[bounce-in_0.5s_ease-out_forwards]">
         <CardHeader>
           <Trophy className="h-16 w-16 mx-auto text-accent"/>
-          <CardTitle className="text-3xl text-primary-foreground">Run Complete!</CardTitle>
-          <CardDescription className="text-primary-foreground/80">Great job, scholar!</CardDescription>
+          <CardTitle className="text-3xl font-headline text-primary">Run Complete!</CardTitle>
+          <CardDescription>Great job, scholar!</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-5xl font-bold text-white">{score}</p>
-          <Button onClick={startGame} size="lg" className="wax-press bg-accent hover:bg-accent/90 text-accent-foreground">
+          <p className="text-5xl font-bold text-foreground">{Math.floor(score)}</p>
+          <Button onClick={startGame} size="lg" className="wax-press">
             <Repeat className="mr-2"/>
             Run Again
           </Button>
@@ -206,12 +229,12 @@ export default function QuizRunnerClient() {
   // Game is Paused
   if (gameState === 'paused') {
     return (
-     <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-bounce-in">
+     <Card className="text-center max-w-lg mx-auto bg-card/80 backdrop-blur-sm animate-[bounce-in_0.5s_ease-out_forwards]">
        <CardHeader>
-         <CardTitle className="text-3xl text-primary-foreground">Game Paused</CardTitle>
+         <CardTitle className="text-3xl font-headline text-primary">Game Paused</CardTitle>
        </CardHeader>
        <CardContent>
-         <Button onClick={() => setGameState('playing')} size="lg" className="wax-press bg-accent hover:bg-accent/90 text-accent-foreground">
+         <Button onClick={() => setGameState('playing')} size="lg" className="wax-press">
            <Play className="mr-2"/>
            Resume
          </Button>
@@ -221,17 +244,17 @@ export default function QuizRunnerClient() {
  }
 
   const isAnswering = gameState === 'question' || result !== null;
+  const isRunning = gameState === 'playing';
 
-  // Main Game Screen
   return (
-    <div className="relative w-full max-w-5xl h-[70vh] mx-auto p-4 rounded-lg bg-primary/70 shadow-2xl overflow-hidden flex flex-col">
+    <div className="relative w-full max-w-5xl h-[75vh] mx-auto p-4 rounded-lg bg-primary/70 shadow-2xl overflow-hidden flex flex-col burnt-edge">
         <Background speed={speed} />
       
         {/* HUD */}
         <div className="relative z-10 flex justify-between items-center mb-4 text-lg font-bold text-white">
             <div className="flex items-center gap-2 bg-black/20 px-3 py-1 rounded-full">
                 <Award size={20}/> 
-                <span>Score: {score}</span>
+                <span>Score: {Math.floor(score)}</span>
             </div>
              <Button variant="ghost" size="icon" onClick={() => setGameState('paused')}>
                 <Pause />
@@ -244,7 +267,8 @@ export default function QuizRunnerClient() {
 
         {/* Runner Track */}
         <div className="relative flex-1 w-full flex flex-col justify-end">
-            <Character lane={characterLane} isRunning={gameState === 'playing'} />
+             {isRunning && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/50 text-7xl font-black font-headline animate-ping">{timeToQuestion}</div>}
+            <Character lane={characterLane} result={result} />
         </div>
       
         {/* Question Overlay */}
@@ -252,10 +276,10 @@ export default function QuizRunnerClient() {
             "absolute inset-0 z-20 flex flex-col justify-center items-center p-8 bg-black/50 backdrop-blur-sm transition-opacity duration-500",
             isAnswering ? "opacity-100" : "opacity-0 pointer-events-none"
         )}>
-             <Card className="text-center mb-6 bg-card/90 animate-bounce-in w-full max-w-2xl">
+             <Card className="text-center mb-6 bg-card/90 animate-[bounce-in_0.5s_ease-out_forwards] w-full max-w-2xl burnt-edge-pulse">
                 <CardHeader>
                     <CardDescription>Question {questionIndex + 1}</CardDescription>
-                    <CardTitle className="text-2xl">{currentQuestion.question}</CardTitle>
+                    <CardTitle className="text-2xl">{questions[questionIndex].question}</CardTitle>
                 </CardHeader>
              </Card>
 
@@ -277,9 +301,10 @@ export default function QuizRunnerClient() {
         { gameState === 'playing' && (
              <div className="relative z-10 mt-4">
                 <p className="text-center text-white/80 text-sm mb-1">Next question in...</p>
-                <Progress value={(timeToQuestion / 7) * 100} className="w-1/2 mx-auto h-2 bg-white/20"/>
+                <Progress value={(timeToQuestion / 5) * 100} className="w-1/2 mx-auto h-2 bg-white/20"/>
             </div>
         )}
     </div>
   );
 }
+
