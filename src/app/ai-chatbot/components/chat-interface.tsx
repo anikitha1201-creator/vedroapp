@@ -19,7 +19,7 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'model',
-      content: 'Hello! I am an AI assistant powered by Gemini. How can I help you today?',
+      content: 'Hello! I am your AI learning assistant, powered by Gemini. How can I help with your studies today?',
     },
   ]);
   const [input, setInput] = useState('');
@@ -94,7 +94,7 @@ export default function ChatInterface() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything..."
+            placeholder="Ask me anything about your studies..."
             disabled={isLoading}
             className="flex-1"
           />
