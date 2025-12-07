@@ -39,7 +39,6 @@ const prompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: { schema: ChatbotInputSchema },
   output: { schema: ChatbotOutputSchema },
-  model: chatbotModel,
   prompt: `
     # Vedro AI Persona & Core Instructions
 
@@ -106,7 +105,10 @@ const chatbotFlow = ai.defineFlow(
     outputSchema: ChatbotOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const { output } = await prompt({
+        input,
+        model: chatbotModel,
+    });
     if (!output) {
       return {
         response:
