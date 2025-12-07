@@ -231,7 +231,7 @@ export default function ChatInterface() {
   }
 
   const handleClearChat = () => {
-    setMessages(prev => prev.slice(0, 1));
+    setMessages([]);
   }
 
   return (
