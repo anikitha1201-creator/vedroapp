@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useCallback, ReactNode } from 'react';
+import { useState, useCallback } from 'react';
 import { generateExperimentExplanation } from '../actions';
 import { Button } from '@/components/ui/button';
-import { BookCopy, FlaskConical, Loader2, Sparkles, Wand2, RefreshCw, Plus, Equal } from 'lucide-react';
+import { BookCopy, Loader2, Sparkles, RefreshCw, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import Beaker from './beaker'; // Use the Beaker component
-import DraggableItem from './draggable-item'; // Use the DraggableItem component
+import Beaker from './beaker';
+import DraggableItem from './draggable-item';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 // --- TYPES AND CONSTANTS ---
 
@@ -75,11 +75,11 @@ const REACTION_RULES: { reactants: string[]; result: string, equation: string, a
 
 // --- UI & LAYOUT COMPONENTS ---
 
-const InventoryPanel = ({ items }: { items: Record<string, Item[]> }) => (
+const InventoryPanel = ({ items, onDrag }: { items: Record<string, Item[]>, onDrag: (item: Item) => void }) => (
   <Card className="lg:col-span-1 h-full flex flex-col">
     <CardHeader>
-      <CardTitle className="flex items-center gap-2">
-        <Wand2 className="text-accent" /> Elemental Scrolls
+      <CardTitle className="flex items-center gap-2 text-primary">
+        <Sparkles /> Elemental Scrolls
       </CardTitle>
     </CardHeader>
     <CardContent className="flex-1 overflow-hidden">
@@ -95,7 +95,7 @@ const InventoryPanel = ({ items }: { items: Record<string, Item[]> }) => (
                 {Object.entries(items).map(([category, categoryItems]) => (
                     <TabsContent key={category} value={category} className="grid grid-cols-2 gap-3 mt-0">
                         {categoryItems.map((item) => (
-                            <DraggableItem key={item.id} item={item} />
+                            <DraggableItem key={item.id} item={item} onDrag={onDrag} />
                         ))}
                     </TabsContent>
                 ))}
@@ -138,18 +138,17 @@ export default function ExperimentClientPage() {
   const handleDrop = (item: Item) => {
     if (!beakerContents.some((i) => i.id === item.id)) {
       setBeakerContents((prev) => [...prev, item]);
-      // Remove from inventory
-      setInventory(prev => {
-        const newInventory = { ...prev };
-        newInventory[item.category] = newInventory[item.category].filter(invItem => invItem.id !== item.id);
-        return newInventory;
-      });
     } else {
         toast({
             title: 'Already Added',
             description: `${item.name} is already in the beaker.`,
         });
     }
+  };
+
+  const handleDrag = (item: Item) => {
+    // This function is triggered when an item starts being dragged from the inventory
+    // You can add logic here if needed, but for now we just handle the drop
   };
 
   const checkForReaction = (currentItems: Item[]) => {
@@ -213,51 +212,53 @@ export default function ExperimentClientPage() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 p-4 lg:p-6 min-h-[80vh]">
-      <InventoryPanel items={inventory} />
+    <DndProvider backend={HTML5Backend}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 p-4 lg:p-6 min-h-[80vh]">
+        <InventoryPanel items={inventory} onDrag={handleDrag} />
 
-      <div className="lg:col-span-2 flex flex-col gap-6">
-        
-        <ReactionDisplay items={beakerContents} reaction={reaction} />
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          
+          <ReactionDisplay items={beakerContents} reaction={reaction} />
 
-        <div className="flex-1 flex flex-col justify-center items-center gap-4">
-            <Beaker contents={beakerContents} onDrop={handleDrop} />
+          <div className="flex-1 flex flex-col justify-center items-center gap-4">
+              <Beaker contents={beakerContents} onDrop={handleDrop} />
+          </div>
+
+          <div className="flex gap-4 justify-center">
+            <Button onClick={handleMix} disabled={isLoading || beakerContents.length < 2}>
+              {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
+              Trigger Reaction
+            </Button>
+            <Button onClick={handleReset} variant="outline">
+              <RefreshCw />
+              Clear Beaker
+            </Button>
+          </div>
+
+          {(isLoading || explanation) && (
+            <Card className="min-h-[150px] torch-flicker">
+                <CardHeader>
+                      <CardTitle className="font-headline text-lg flex items-center gap-2 text-primary">
+                        <BookCopy /> The Alchemist's Scroll
+                      </CardTitle>
+                </CardHeader>
+                <CardContent>
+                {isLoading && !explanation ? (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse [animation-delay:0.2s]"></div>
+                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse [animation-delay:0.4s]"></div>
+                        <span className="ml-2">The Alchemist is transcribing the results...</span>
+                    </div>
+                ): (
+                      <div className="prose prose-sm dark:prose-invert max-w-none animate-[ink-fade-in_1s_ease-out_forwards] opacity-0"
+                           dangerouslySetInnerHTML={{ __html: explanation }} />
+                )}
+                </CardContent>
+            </Card>
+          )}
         </div>
-
-        <div className="flex gap-4 justify-center">
-          <Button onClick={handleMix} disabled={isLoading || beakerContents.length < 2}>
-            {isLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            Trigger Reaction
-          </Button>
-          <Button onClick={handleReset} variant="outline">
-            <RefreshCw />
-            Clear Beaker
-          </Button>
-        </div>
-
-        {(isLoading || explanation) && (
-          <Card className="min-h-[150px] torch-flicker">
-              <CardHeader>
-                    <CardTitle className="font-headline text-lg flex items-center gap-2">
-                      <BookCopy /> The Alchemist's Scroll
-                    </CardTitle>
-              </CardHeader>
-              <CardContent>
-              {isLoading && !explanation ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
-                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse [animation-delay:0.2s]"></div>
-                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse [animation-delay:0.4s]"></div>
-                      <span className="ml-2">The Alchemist is transcribing the results...</span>
-                  </div>
-              ): (
-                    <div className="prose prose-sm dark:prose-invert max-w-none animate-[ink-fade-in_1s_ease-out_forwards] opacity-0"
-                         dangerouslySetInnerHTML={{ __html: explanation }} />
-              )}
-              </CardContent>
-          </Card>
-        )}
       </div>
-    </div>
+    </DndProvider>
   );
 }
