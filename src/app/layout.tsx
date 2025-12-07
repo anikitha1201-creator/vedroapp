@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import DustParticles from '@/components/dust-particles';
 import BookLayout from '@/components/book-layout';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'Vedro – Learning Through Interaction',
@@ -35,10 +36,14 @@ export default function RootLayout({
           'font-body antialiased min-h-screen bg-background text-foreground'
         )}
       >
-        <DustParticles />
-        <BookLayout>{children}</BookLayout>
-        <Toaster />
+        <FirebaseClientProvider>
+          <DustParticles />
+          <BookLayout>{children}</BookLayout>
+          <Toaster />
+        </FirebaseClientProvider>
       </body>
     </html>
   );
 }
+
+    

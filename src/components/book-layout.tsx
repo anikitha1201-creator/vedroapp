@@ -1,7 +1,7 @@
 
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -18,6 +18,9 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { useAuth, useUser } from '@/firebase';
+import { Button } from './ui/button';
+import { signOut } from 'firebase/auth';
 
 const navItems = [
   { href: '/', icon: <LayoutDashboard />, text: 'Dashboard' },
@@ -30,11 +33,20 @@ const navItems = [
 
 export default function BookLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
   const [isTurning, setIsTurning] = useState(false);
   const [displayedPath, setDisplayedPath] = useState(pathname);
   const pageRef = useRef<HTMLDivElement>(null);
 
   const isDashboard = pathname === '/';
+  
+  useEffect(() => {
+    if (!isUserLoading && !user && pathname !== '/login') {
+      router.push('/login');
+    }
+  }, [isUserLoading, user, pathname, router]);
 
   useEffect(() => {
     if (pathname !== displayedPath) {
@@ -47,9 +59,28 @@ export default function BookLayout({ children }: { children: ReactNode }) {
     }
   }, [pathname, displayedPath]);
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
+  
   // Special handling for login/signup to not use the book layout
   if (pathname === '/login' || pathname === '/signup') {
     return <main className="container mx-auto px-4 py-8">{children}</main>;
+  }
+
+  // Loading state
+  if (isUserLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading Scholar...</p>
+      </div>
+    );
+  }
+  
+  // Don't render layout if no user and not on login page
+  if (!user) {
+    return null;
   }
 
   // Dashboard View (Split-screen book)
@@ -90,17 +121,17 @@ export default function BookLayout({ children }: { children: ReactNode }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 ring-2 ring-accent">
-                      <AvatarImage src="https://picsum.photos/seed/user-avatar/100/100" />
+                      <AvatarImage src={user.photoURL || undefined} />
                       <AvatarFallback>
                         <User />
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-semibold text-sm leading-none">
-                        Scholar Alex
+                        {user.displayName}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        alex.scholar@vedro.edu
+                        {user.email}
                       </p>
                     </div>
                   </div>
@@ -111,12 +142,14 @@ export default function BookLayout({ children }: { children: ReactNode }) {
                     >
                       <Settings className="w-5 h-5 text-muted-foreground" />
                     </Link>
-                    <Link
-                      href="/login"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleLogout}
                       className="p-2 rounded-md hover:bg-primary/10"
                     >
                       <LogOut className="w-5 h-5 text-muted-foreground" />
-                    </Link>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -169,3 +202,5 @@ export default function BookLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+    

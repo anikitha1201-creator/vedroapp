@@ -212,7 +212,8 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {
@@ -333,3 +334,4 @@
     "reasoning": "The Firestore structure is designed to ensure Authorization Independence and support the QAPs by adhering to the core design principles and strategy mandates outlined. Path-based ownership is used for user-specific data like UserProfile, GameHistory, and ExperimentResult. This means that a user's data is stored under their own `uid`, which simplifies security rules and makes them more efficient, eliminating the need for complex `get()` calls.\n\nThe `/topics/{topicId}/steps` collection is structured to store topic steps. The rules will need to validate `topicId` exists. Data requiring more complex authorization models, such as collaborative documents, will use membership maps (if necessary, although not apparent from the requirements).\n\nSegregation is used to separate data with different access needs, ensuring that all documents within a single collection share the same security posture. This approach simplifies security rules and prevents unintended data access. The design also takes into account the need for clear and predictable data models by enforcing consistent naming conventions and explicit state modeling."
   }
 }
+    

@@ -8,11 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useAuth, useUser } from '@/firebase';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { LogIn } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const GoogleIcon = () => (
   <svg className="h-5 w-5" viewBox="0 0 48 48">
@@ -37,11 +37,32 @@ const GoogleIcon = () => (
 
 export default function LoginPage() {
   const router = useRouter();
+  const auth = useAuth();
+  const { user, isLoading } = useUser();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push('/');
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing in with Google', error);
+    }
   };
+
+  if (isLoading || user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -50,56 +71,26 @@ export default function LoginPage() {
           <CardTitle className="text-3xl text-ink-fade">
             Welcome, Scholar
           </CardTitle>
-          <CardDescription className="text-ink-fade" style={{ animationDelay: '0.2s' }}>
+          <CardDescription
+            className="text-ink-fade"
+            style={{ animationDelay: '0.2s' }}
+          >
             Unlock the scrolls of knowledge.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4 text-ink-fade" style={{ animationDelay: '0.4s' }}>
-            <div className="space-y-2">
-              <Label htmlFor="email">Scroll of Identity (Email)</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="scholar@ancient-academy.edu"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Secret Word (Password)</Label>
-              <Input id="password" type="password" required />
-            </div>
-          </CardContent>
-          <CardFooter className="flex-col gap-4 text-ink-fade" style={{ animationDelay: '0.6s' }}>
-            <Button type="submit" className="w-full wax-press">
-              <LogIn />
-              Enter the Library
-            </Button>
-            <div className="relative w-full mt-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or summon with
-                </span>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full wax-press">
-              <GoogleIcon /> Summon with Google
-            </Button>
-            <p className="text-center text-sm text-muted-foreground mt-2">
-              Not yet a registered Scribe?{' '}
-              <Link
-                href="/signup"
-                className="font-semibold text-primary hover:underline"
-              >
-                Join the Academy
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
+        <CardContent>
+          <Button onClick={handleLogin} className="w-full wax-press">
+            <GoogleIcon /> Summon with Google
+          </Button>
+        </CardContent>
+        <CardFooter className="flex-col gap-4 text-ink-fade" style={{ animationDelay: '0.6s' }}>
+          <p className="text-center text-xs text-muted-foreground mt-2">
+            Sign in to access the full library of interactive lessons and games.
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );
 }
+
+    
