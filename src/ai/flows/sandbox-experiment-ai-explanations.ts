@@ -9,9 +9,9 @@
  */
 
 import {ai} from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 import {z} from 'genkit';
 import { marked } from 'marked';
+import { runGemini } from '@/ai/geminiClient';
 
 const ExperimentExplanationInputSchema = z.object({
   experimentDescription:
@@ -34,17 +34,21 @@ export async function getExperimentExplanation(
   return { explanation: htmlExplanation };
 }
 
-const prompt = ai.definePrompt({
-  name: 'experimentExplanationPrompt',
-  input: {schema: ExperimentExplanationInputSchema},
-  output: {schema: ExperimentExplanationOutputSchema},
-  model: googleAI.model('gemini-1.5-flash'),
-  prompt: `You are an expert science teacher with the persona of a wise, ancient alchemist. A student is using an interactive sandbox and has just performed an experiment.
+
+const experimentExplanationFlow = ai.defineFlow(
+  {
+    name: 'experimentExplanationFlow',
+    inputSchema: ExperimentExplanationInputSchema,
+    outputSchema: ExperimentExplanationOutputSchema,
+  },
+  async input => {
+    
+    const prompt = `You are an expert science teacher with the persona of a wise, ancient alchemist. A student is using an interactive sandbox and has just performed an experiment.
 
 Your task is to provide a clear, engaging, and educational explanation of the reaction that occurred.
 
 The student's experiment is as follows:
-{{experimentDescription}}
+${input.experimentDescription}
 
 Please generate a response in Markdown format that includes the following sections, using thematic and engaging language:
 
@@ -67,22 +71,11 @@ Briefly address a common misconception related to this experiment. (e.g., "Many 
 Suggest a specific follow-up experiment the student could try in the sandbox to further their learning, using items from the inventory. (e.g., "Now that you have mastered displacement, try combining the Iron Nail (Fe) with the Copper Sulfate (CuSO4).")
 
 Keep your tone encouraging, wise, and slightly magical. The goal is to make learning feel like discovering ancient secrets.
-  `,
-});
+  `;
 
-const experimentExplanationFlow = ai.defineFlow(
-  {
-    name: 'experimentExplanationFlow',
-    inputSchema: ExperimentExplanationInputSchema,
-    outputSchema: ExperimentExplanationOutputSchema,
-  },
-  async input => {
     try {
-        const {output} = await prompt(input);
-        if (!output) {
-          throw new Error("Flow produced no output.");
-        }
-        return output;
+        const text = await runGemini(prompt);
+        return { explanation: text };
     } catch (error) {
         console.error("Error in experimentExplanationFlow:", error);
         return {explanation: "### The Alchemist Ponders...\nThe mixture is inert, like a silent stone in a forgotten library. No reaction occurred with these elements. Perhaps try combining different ingredients from the scrolls?"}

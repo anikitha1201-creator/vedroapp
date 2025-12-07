@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Vedro AI Chatbot Flow
@@ -6,7 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
+import { runGemini } from '@/ai/geminiClient';
 import {
   ChatbotInputSchema,
   LearningPackSchema,
@@ -28,23 +27,24 @@ export async function getChatbotResponse(
   return result;
 }
 
-// To switch models, you can change the string here.
-// For example, to use a more powerful model, you might use 'gemini-1.5-pro'.
-// Ensure the model name is compatible with the API version you are using.
-const chatbotModel = googleAI.model('gemini-1.5-flash');
-
-const prompt = ai.definePrompt({
-  name: 'vedroEducationalPrompt',
-  input: { schema: ChatbotInputSchema },
-  output: { schema: LearningPackSchema },
-  prompt: `
+const chatbotFlow = ai.defineFlow(
+  {
+    name: 'chatbotFlow',
+    inputSchema: ChatbotInputSchema,
+    outputSchema: LearningPackSchema,
+  },
+  async (input) => {
+    // This prompt is sent to the Gemini API to generate the structured learning pack.
+    // It instructs the AI on its persona, the required output format, and the rules to follow.
+    const prompt = `
     You are Vedro AI — an educational learning assistant designed to teach any concept clearly and simply.
-    Your job is to explain any topic the student asks about in a way that students aged 10 to 22 can easily understand.
+    Your job is to explain any topic the student asks in a way that students aged 10 to 22 can easily understand.
 
-    When the user gives a topic, you MUST return one structured learning pack in the exact format defined by the output schema.
+    When the user gives a topic, you MUST return one structured learning pack in the exact JSON format defined by the following schema:
+    ${JSON.stringify(LearningPackSchema.jsonSchema)}
 
     The topic to explain is:
-    {{{message}}}
+    ${input.message}
 
     All explanations must follow these rules:
     - Be accurate and student-friendly.
@@ -56,20 +56,24 @@ const prompt = ai.definePrompt({
     - Keep your tone helpful, clear, and supportive.
 
     Your role is ONLY education. Never produce entertainment content, jokes, or unrelated information. Stay fully academic.
-  `,
-});
+  `;
 
-const chatbotFlow = ai.defineFlow(
-  {
-    name: 'chatbotFlow',
-    inputSchema: ChatbotInputSchema,
-    outputSchema: LearningPackSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input, { model: chatbotModel });
-    if (!output) {
+    try {
+      const responseText = await runGemini(prompt, true); // Request JSON output
+      const jsonResponse = JSON.parse(responseText);
+
+      // Validate the response against the schema to ensure it's in the correct format.
+      const validation = LearningPackSchema.safeParse(jsonResponse);
+
+      if (!validation.success) {
+        console.error('Gemini response validation error:', validation.error);
+        throw new Error('AI response did not match the expected format.');
+      }
+      
+      return validation.data;
+    } catch (error) {
+      console.error("Error in chatbotFlow:", error);
       throw new Error("I'm sorry, I was unable to generate a learning pack for that topic. Please try another one.");
     }
-    return output;
   }
 );
