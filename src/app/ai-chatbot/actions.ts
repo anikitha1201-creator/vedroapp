@@ -1,8 +1,8 @@
 'use server';
 
-import { getChatbotResponse, type ChatbotInput } from '@/ai/flows/chatbot';
+import { getChatbotResponse, type ChatbotInput, type ChatbotOutput } from '@/ai/flows/chatbot';
 
-export async function generateChatbotResponse(input: ChatbotInput) {
+export async function generateChatbotResponse(input: ChatbotInput): Promise<{ success: true; response: ChatbotOutput } | { success: false; error: string }> {
   try {
     const result = await getChatbotResponse(input);
     return { success: true, response: result };

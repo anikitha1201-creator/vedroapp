@@ -45,12 +45,16 @@ export default function ChatInterface() {
     setInput('');
     setIsLoading(true);
 
-    const history = messages.map(msg => ({ role: msg.role, content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }));
+    const history = messages.map(msg => ({ 
+      role: msg.role, 
+      content: typeof msg.content === 'string' ? msg.content : "Previous structured response" 
+    }));
 
     const result = await generateChatbotResponse({ history, prompt: input });
 
     if (result.success && result.response) {
-      const aiMessage: Message = { role: 'model', content: result.response };
+      // The response from the new flow is an object with a 'response' property which is a string.
+      const aiMessage: Message = { role: 'model', content: result.response.response };
       setMessages((prev) => [...prev, aiMessage]);
     } else {
       toast({
@@ -58,6 +62,7 @@ export default function ChatInterface() {
         description: result.error,
         variant: 'destructive',
       });
+       // If the API call fails, remove the user's message to allow them to try again.
        setMessages(prev => prev.slice(0, prev.length - 1));
     }
     setIsLoading(false);
