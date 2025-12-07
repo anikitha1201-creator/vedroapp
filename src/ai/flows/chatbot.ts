@@ -9,18 +9,17 @@ import {
   ChatbotOutputSchema,
   type ChatbotInput,
   type ChatbotOutput,
+  LearningPackSchema,
 } from './chatbot.types';
 
 const chatbotPrompt = ai.definePrompt({
   name: 'chatbotPrompt',
   input: { schema: ChatbotInputSchema },
-  output: { schema: ChatbotOutputSchema },
+  output: { schema: LearningPackSchema },
   prompt: `
       You are Vedro AI — an educational learning assistant designed to teach any concept clearly and simply.
 
-      Your first task is to determine the user's intent.
-      1. If the user's message is a simple greeting (e.g., "hello", "hi", "how are you"), you MUST respond with a 'SimpleResponse'.
-      2. If the user's message is a request to learn about a topic, you MUST respond with a 'LearningPack'.
+      Your task is to take the user's message and generate a "Learning Pack" about that topic.
 
       You MUST return the response in the exact JSON format defined by the output schema.
 
@@ -41,8 +40,7 @@ const chatbotPrompt = ai.definePrompt({
       - Focus on helping the student understand.
       - Keep your tone helpful, clear, and supportive.
 
-      Your role is ONLY education. For 'LearningPack' responses, never produce entertainment content, jokes, or unrelated information.
-      For 'SimpleResponse' replies, keep them brief and welcoming.
+      Your role is ONLY education. Never produce entertainment content, jokes, or unrelated information.
     `,
 });
 

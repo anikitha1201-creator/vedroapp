@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Bot, ChevronRight, Loader2, Send, User, Check, X, Paperclip, FileText, Trash2, Plus, Eraser } from 'lucide-react';
-import type { LearningPack, QuizQuestionSchema, ChatbotOutput } from '@/ai/flows/chatbot.types';
+import type { LearningPack, ChatbotOutput } from '@/ai/flows/chatbot.types';
+import { QuizQuestionSchema } from '@/ai/flows/chatbot.types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { z } from 'zod';
@@ -121,16 +122,8 @@ const AssistantMessage = ({ content }: { content: ChatbotOutput | string }) => {
         return <p>{content}</p>;
     }
     
-    if (content.type === 'learningPack') {
-        return <LearningPackDisplay pack={content.data} />;
-    }
-
-    if (content.type === 'simpleReply') {
-        return <p>{content.data.reply}</p>;
-    }
-
-    // Fallback for unexpected content shapes
-    return <p>I'm not sure how to display this.</p>;
+    // The content is always a LearningPack now
+    return <LearningPackDisplay pack={content} />;
 };
 
 const UserMessageContent = ({ message }: { message: Message }) => {

@@ -47,22 +47,6 @@ export const LearningPackSchema = z.object({
 });
 export type LearningPack = z.infer<typeof LearningPackSchema>;
 
-export const SimpleResponseSchema = z.object({
-  reply: z
-    .string()
-    .describe('A simple, conversational reply to a greeting.'),
-});
-export type SimpleResponse = z.infer<typeof SimpleResponseSchema>;
-
-// This union schema allows the AI to return one of two structured responses.
-export const ChatbotOutputSchema = z.union([
-  LearningPackSchema.transform(val => ({
-    type: 'learningPack' as const,
-    data: val,
-  })),
-  SimpleResponseSchema.transform(val => ({
-    type: 'simpleReply' as const,
-    data: val,
-  })),
-]);
-export type ChatbotOutput = z.infer<typeof ChatbotOutputSchema>;
+// The output is now just a LearningPack
+export const ChatbotOutputSchema = LearningPackSchema;
+export type ChatbotOutput = LearningPack;
