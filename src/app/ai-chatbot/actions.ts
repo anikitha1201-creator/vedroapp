@@ -1,7 +1,7 @@
 'use server';
 
 import { getChatbotResponse } from '@/ai/flows/chatbot';
-import type { ChatbotInput } from '@/ai/flows/chatbot.types';
+import type { ChatbotInput, LearningPack } from '@/ai/flows/chatbot.types';
 
 
 const MAX_RETRIES = 3;
@@ -19,7 +19,7 @@ const INITIAL_DELAY_MS = 1000;
  */
 
 type SafeResult =
-  | { success: true; response: string }
+  | { success: true; response: LearningPack }
   | { success: false; error: string };
 
 /**
@@ -34,7 +34,7 @@ export async function safeGenerateContentWithRetry(
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
       const result = await getChatbotResponse(input);
-      return { success: true, response: result.response };
+      return { success: true, response: result };
     } catch (error: any) {
       // Check for HTTP 429 (Too Many Requests) or 5xx server errors
       const isRateLimitError =
@@ -56,7 +56,7 @@ export async function safeGenerateContentWithRetry(
         }
         return {
           success: false,
-          error: 'An unexpected error occurred. Please try again.',
+          error: error.message || 'An unexpected error occurred. Please try again.',
         };
       }
     }

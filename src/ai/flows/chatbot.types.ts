@@ -5,7 +5,41 @@ export const ChatbotInputSchema = z.object({
 });
 export type ChatbotInput = z.infer<typeof ChatbotInputSchema>;
 
-export const ChatbotOutputSchema = z.object({
-  response: z.string().describe("The AI's response, formatted as Markdown."),
+export const QuizQuestionSchema = z.object({
+  question: z.string(),
+  options: z.array(z.string()).length(4),
+  correctAnswer: z.string(),
 });
-export type ChatbotOutput = z.infer<typeof ChatbotOutputSchema>;
+
+export const LearningPackSchema = z.object({
+  simpleSummary: z
+    .string()
+    .describe(
+      'A very simple explanation of the topic in 5-6 lines, as if teaching a beginner.'
+    ),
+  keyLearningPoints: z
+    .array(z.string())
+    .min(4)
+    .max(6)
+    .describe(
+      'The most important ideas of the concept, presented as 4-6 bullet points.'
+    ),
+  stepByStepExplanation: z
+    .array(z.string())
+    .min(3)
+    .max(8)
+    .describe(
+      'A clear, sequential explanation of the process or logic in 3-8 ordered steps.'
+    ),
+  causeEffectInfo: z
+    .string()
+    .describe('A description of how different factors affect the topic.'),
+  miniQuiz: z
+    .array(QuizQuestionSchema)
+    .length(5)
+    .describe(
+      'A mini quiz with 5 multiple-choice questions, each with 4 options and a marked correct answer.'
+    ),
+});
+
+export type LearningPack = z.infer<typeof LearningPackSchema>;
