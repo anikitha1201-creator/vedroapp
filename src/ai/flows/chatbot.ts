@@ -20,8 +20,6 @@ const chatbotPrompt = ai.definePrompt({
 
       Your task is to take the user's message and generate a "Learning Pack" about that topic.
 
-      You MUST return the response in the exact JSON format defined by the output schema.
-
       --- RESPONSE RULES ---
       1.  **NO MARKDOWN**: You MUST NOT use any Markdown formatting. This includes **bold**, *italics*, lists with '*', or '#'. All text should be plain.
 
