@@ -46,10 +46,10 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const newUser = userCredential.user;
 
-      // Update user's display name
+      // Update user's display name and wait for it to complete
       await updateProfile(newUser, { displayName: name });
 
-      // Create a user profile document in Firestore
+      // Create a user profile document in Firestore (non-blocking)
       const userDocRef = doc(firestore, 'users', newUser.uid);
       const userProfileData = {
         id: newUser.uid,
@@ -57,9 +57,9 @@ export default function SignupPage() {
         email: newUser.email,
         theme: 'dark' // default theme
       };
-      // Use the non-blocking fire-and-forget function
       setDocumentNonBlocking(userDocRef, userProfileData, { merge: true });
 
+      // Now redirect to dashboard
       router.push('/');
     } catch (error: any) {
       console.error('Error signing up with email', error);
@@ -149,4 +149,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
