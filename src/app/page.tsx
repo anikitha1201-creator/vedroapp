@@ -1,8 +1,13 @@
 
-import { FlaskConical, Gamepad2, Puzzle, User } from 'lucide-react';
+import { FlaskConical, Gamepad2, Puzzle, Sparkles, User } from 'lucide-react';
 import Link from 'next/link';
 
 const dashboardItems = [
+  {
+    title: 'Vedro AI',
+    href: '/ai-chatbot',
+    icon: <Sparkles />,
+  },
   {
     title: 'Concept Builder',
     href: '/concept-builder',
