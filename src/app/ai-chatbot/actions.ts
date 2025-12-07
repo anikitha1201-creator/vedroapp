@@ -1,12 +1,12 @@
 'use server';
-import { chat } from '@/ai/flows/chatbot';
-import type { LearningPack } from '@/ai/flows/schemas';
+import { getChatbotResponse } from '@/ai/flows/chatbot';
+import type { LearningPack } from '@/ai/flows/chatbot.types';
 
 export async function getLearningPack(
   topic: string
 ): Promise<{ pack: LearningPack | null; error: string | null }> {
   try {
-    const learningPack = await chat(topic);
+    const learningPack = await getChatbotResponse({ message: topic });
     return { pack: learningPack, error: null };
   } catch (error) {
     console.error('Error generating learning pack:', error);

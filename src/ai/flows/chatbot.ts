@@ -1,76 +1,115 @@
 'use server';
-/**
- * @fileOverview The main AI-powered chatbot flow for Vedro.
- * This file defines the AI prompt and the Genkit flow that powers the
- * educational chatbot. The data schemas are imported from a separate file
- * to comply with Next.js 'use server' module constraints.
- *
- * - chat - The primary function that processes a user's message.
- */
 
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { LearningPackSchema, type LearningPack } from './schemas';
+import { ai } from "@/ai/genkit";
+import {
+  ChatbotInputSchema,
+  LearningPackSchema,
+  type ChatbotInput,
+  type LearningPack,
+} from "./chatbot.types";
 
 /**
- * Defines the prompt template that will be sent to the Gemini model.
- * This prompt is carefully structured to guide the AI to produce output
- * that conforms to the `LearningPackSchema`.
+ * Main Prompt — Clean, Error-Proof, No JSON, No Markdown
  */
 const chatbotPrompt = ai.definePrompt({
-  name: 'chatbotPrompt',
-  input: { schema: z.string() },
+  name: "chatbotPrompt",
+  input: { schema: ChatbotInputSchema },
   output: { schema: LearningPackSchema },
 
-  prompt: `You are Vedro, an expert educational assistant. Your role is to take a user's query about an educational topic and break it down into a comprehensive and easy-to-digest "Learning Pack."
+  prompt: `
+You are Vedro AI — an educational assistant powered by Google Gemini.
+Your job is to generate a structured Learning Pack for any academic topic.
 
-    **TOPIC:**
-    {{{input}}}
+IMPORTANT RULES:
+1. DO NOT output JSON. Genkit will map your output into fields.
+2. DO NOT use markdown: no **bold**, no *, no #.
+3. Always fill ALL fields clearly unless it is a greeting.
+4. Be concise, friendly, accurate, and student-friendly.
 
-    **CRITICAL RULES:**
-    1.  **GREETING HANDLING:** If the user's input is a simple greeting (like "hi", "hello", "hey", "good morning", etc.) and not a learning topic, you MUST respond with a friendly greeting. For this case:
-        - Set the 'simpleSummary' to a greeting like: "Hi there! What educational topic can I help you explore today?"
-        - Set ALL other fields (keyLearningPoints, stepByStepExplanation, causeAndEffect, quizQuestions) to be EMPTY arrays ([]).
-        - Do not generate any educational content for a greeting.
+GREETING RULE:
+If the user message is a greeting such as:
+hi, hello, hey, what's up, good morning, good afternoon
+then:
+- simpleSummary = a friendly greeting like:
+  "Hi! What would you like to learn today?"
+- keyLearningPoints = []
+- stepByStepExplanation = []
+- causeAndEffect = []
+- quizQuestions = []
+and STOP.
 
-    2.  **EDUCATIONAL TOPIC HANDLING:** If the user provides an educational topic, you MUST populate ALL the fields in the Learning Pack. Do not leave any field blank unless the rule above applies.
-        - **simpleSummary:** Provide a concise, 3-5 sentence overview of the topic.
-        - **keyLearningPoints:** Generate 3-5 distinct, crucial facts or concepts.
-        - **stepByStepExplanation:** Create a clear, sequential explanation of a core process, with 3-6 steps.
-        - **causeAndEffect:** Identify 2-4 clear cause-and-effect relationships.
-        - **quizQuestions:** Create 3-5 multiple-choice questions, each with exactly 4 options and a clearly stated correct answer.
+LEARNING PACK RULES:
+When the student asks ANY academic topic:
+Fill these fields:
 
-    3.  **ACCURACY:** Ensure all information is factually correct, clear, and suitable for a student.
-    4.  **NO MARKDOWN or JSON:** Your output should be plain text only. Do not wrap your response in Markdown or JSON formatting. Genkit will handle the schema mapping.
-    `,
+simpleSummary:
+  Explain the topic in 3–5 sentences.
+
+keyLearningPoints:
+  Provide 3–5 important points.
+  Each point needs:
+    title: short 2–4 word label
+    description: 1–2 sentence explanation.
+
+stepByStepExplanation:
+  Provide 3–6 short steps explaining the topic in logical order.
+
+causeAndEffect:
+  Give 2–4 pairs:
+    cause: explanation of why something happens
+    effect: the result
+
+quizQuestions:
+  Provide 3–5 MCQs.
+  Each must include:
+    question
+    4 options (A, B, C, D)
+    correctAnswer (must match one option exactly)
+
+Now generate the Learning Pack for:
+"{{{message}}}"
+
+{{#if fileDataUri}}
+Use this document to support your explanation:
+{{media url=fileDataUri}}
+{{/if}}
+`,
 });
 
 /**
- * Defines the main Genkit flow for the chatbot.
- * This flow takes the user's string input, invokes the AI prompt,
- * and returns the structured `LearningPack` object.
+ * Chatbot Flow
  */
-const chatbotFlow = ai.defineFlow(
+export const chatbotFlow = ai.defineFlow(
   {
-    name: 'chatbotFlow',
-    inputSchema: z.string(),
+    name: "chatbotFlow",
+    inputSchema: ChatbotInputSchema,
     outputSchema: LearningPackSchema,
   },
-  async (topic) => {
-    const { output } = await chatbotPrompt(topic);
-    // The 'output' is guaranteed by Genkit to be valid and match the LearningPackSchema.
-    // The exclamation mark asserts that output will not be null.
-    return output!;
+  async (input) => {
+    const { output } = await chatbotPrompt(input);
+
+    if (!output) {
+      throw new Error(
+        "The Vedro AI is currently busy. Please try again in a moment."
+      );
+    }
+
+    return output;
   }
 );
 
 /**
- * The primary exported function that serves as the entry point to the chatbot flow.
- * It takes a user's message and returns a promise of a LearningPack.
- *
- * @param {string} userMessage - The message from the user.
- * @returns {Promise<LearningPack>} A promise that resolves to the structured learning pack.
+ * Main handler for frontend
  */
-export async function chat(userMessage: string): Promise<LearningPack> {
-  return chatbotFlow(userMessage);
+export async function getChatbotResponse(
+  input: ChatbotInput
+): Promise<LearningPack> {
+  try {
+    return await chatbotFlow(input);
+  } catch (error) {
+    console.error("Vedro AI Error:", error);
+    throw new Error(
+      "The Vedro AI is currently busy. Please try again in a moment."
+    );
+  }
 }
